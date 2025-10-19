@@ -102,3 +102,10 @@ temp/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+.wucai/
+.cursor/
+.deepseek/
+.gemini/
+
+project_requirement.md
