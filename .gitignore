@@ -107,4 +107,12 @@ Thumbs.db
 .deepseek/
 .gemini/
 
-project_requirement.md
+.metadata/
+
+# Platform
+ios/
+android/
+macos/
+windows/
+linux/
+web/
