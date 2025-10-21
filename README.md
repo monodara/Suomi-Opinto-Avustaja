@@ -9,7 +9,14 @@
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
 ![Stable%20Diffusion](https://img.shields.io/badge/Stable%20Diffusion-000000?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMnM0LjQ4IDEwIDEwIDEwIDEwLTQuNDggMTAtMTBTMTcuNTIgMiAxMiAyem0zLjY4IDExLjg0TDEyIDEwLjEyIDguMzIgMTMuOCA3IDExLjY4IDEyIDQuMTYgMTcgMTEuNjggMTUuNjggMTMuODR6Ii8+PC9zdmc+)
 
-SisuHyy is a comprehensive Finnish language learning application that provides news reading, vocabulary management, and flashcard-based learning to help users improve their Finnish language skills.
+SisuHyy is a comprehensive Finnish language learning application that combines news reading, vocabulary management, and flashcard-based learning to help users effectively improve their Finnish proficiency.
+
+The key idea behind this app is that translation, while convenient, can actually hinder natural language acquisition, especially in listening and reading.
+
+To address this, the app leverages the [TNPP](https://github.com/TurkuNLP/Turku-neural-parser-pipeline)([Turku neural parser pipeline](https://turkunlp.org/Turku-neural-parser-pipeline/)) for word segmentation, morphological tagging, and lemmatization, along with the ```suomisanakirja``` a Finnish-to-Finnish dictionary — for authentic word definitions and examples.
+
+In addition, visual learning plays an essential role in vocabulary retention.
+SisuHyy integrates AI-generated images to create meaningful visual associations for each word, making memorization more intuitive and engaging.
 
 ## Features
 
