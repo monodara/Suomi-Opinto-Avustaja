@@ -107,7 +107,7 @@ Thumbs.db
 .deepseek/
 .gemini/
 
-.metadata/
+frontend/.metadata/
 
 # Platform
 ios/
