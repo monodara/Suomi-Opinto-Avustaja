@@ -7,17 +7,67 @@ import 'package:hive/hive.dart';
 import '../utils/navigation_controller.dart';
 import 'saved_article_detail.dart';
 
-class HomePage extends StatelessWidget {
-  final Future<NewsItem> Function() fetchNews;
+class HomePage extends StatefulWidget {
+  final Future<NewsItem?> Function() fetchNews;
 
   const HomePage({super.key, required this.fetchNews});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  Future<NewsItem?>? _newsFuture;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _newsFuture = widget.fetchNews();
+  }
+
+  void _retry() {
+    setState(() {
+      _newsFuture = widget.fetchNews();
+      _error = null;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return FutureBuilder<NewsItem>(
-      future: fetchNews(),
+    return FutureBuilder<NewsItem?>(
+      future: _newsFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Ladataan uutisia...'),
+              ],
+            ),
+          );
+        } else if (snapshot.hasError || snapshot.data == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  _error ?? "Failed to load news.",
+                  style: const TextStyle(fontSize: 16),
+                ),
+                TextButton(
+                  onPressed: _retry,
+                  child: const Text('Yritä uudelleen'),
+                ),
+              ],
+            ),
+          );
+        } else {
           final article = snapshot.data!;
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -215,43 +265,7 @@ class HomePage extends StatelessWidget {
               ),
             ],
           );
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 60, color: Colors.red),
-                const SizedBox(height: 16),
-                Text(
-                  "Error: ${snapshot.error}",
-                  style: const TextStyle(fontSize: 16),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Refresh by rebuilding the widget by replacing with a new HomePage
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomePage(fetchNews: fetchNews),
-                      ),
-                    );
-                  },
-                  child: const Text('Yritä uudelleen'),
-                ),
-              ],
-            ),
-          );
         }
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Ladataan uutisia...'),
-            ],
-          ),
-        );
       },
     );
   }

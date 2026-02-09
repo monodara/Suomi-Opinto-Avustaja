@@ -45,13 +45,17 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Future<NewsItem> fetchNews() async {
-    final response = await http.get(Uri.parse('$apiBaseUrl/latest-news'));
+  Future<NewsItem?> fetchNews() async {
+    try {
+      final response = await http.get(Uri.parse('$apiBaseUrl/latest-news'));
 
-    if (response.statusCode == 200) {
-      return NewsItem.fromJson(json.decode(utf8.decode(response.bodyBytes)));
-    } else {
-      throw Exception('Loading news failed');
+      if (response.statusCode == 200) {
+        return NewsItem.fromJson(json.decode(utf8.decode(response.bodyBytes)));
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
     }
   }
 
@@ -73,7 +77,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MainApp extends StatefulWidget {
-  final Future<NewsItem> Function() fetchNews;
+  final Future<NewsItem?> Function() fetchNews;
   const MainApp({super.key, required this.fetchNews});
 
   @override
@@ -166,18 +170,5 @@ class _MainAppState extends State<MainApp> {
         ],
       ),
     );
-  }
-
-  // Public methods for other widgets to access
-  void setSelectedArticle(NewsItem article) {
-    setState(() {
-      _selectedArticle = article;
-    });
-  }
-
-  void clearSelectedArticle() {
-    setState(() {
-      _selectedArticle = null;
-    });
   }
 }

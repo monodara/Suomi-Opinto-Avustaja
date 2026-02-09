@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from ..services.tnpp_lookup import analyze_finnish_word
 from ..services.sanakirja_lookup import fetch_sanakirja_definitions
@@ -7,6 +7,8 @@ router = APIRouter()
 
 @router.get("/define")
 async def define_word(word: str):
+    if not word or not word.strip():
+        raise HTTPException(status_code=400, detail="Word parameter cannot be empty.")
     # use TNPP model to analyze word form and lemma
     tnpp_result = analyze_finnish_word(word)
     lemma_str = tnpp_result["lemma"]  # it can be like 'alennus#myynti'
