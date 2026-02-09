@@ -13,6 +13,7 @@ class WordbookPage extends StatefulWidget {
 
 class _WordbookPageState extends State<WordbookPage> {
   late Box<SavedWord> _wordBox;
+  bool _isLoading = true; // Add loading state
 
   @override
   void initState() {
@@ -22,12 +23,14 @@ class _WordbookPageState extends State<WordbookPage> {
 
   Future<void> _openBox() async {
     _wordBox = await Hive.openBox<SavedWord>('wordbook');
-    setState(() {}); // Refresh
+    setState(() {
+      _isLoading = false; // Set loading to false after box is open
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!Hive.isBoxOpen('wordbook')) {
+    if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 

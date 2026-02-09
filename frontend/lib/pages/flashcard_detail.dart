@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/config.dart';
 import 'package:frontend/models/flashcard.dart';
 import 'package:hive/hive.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' as html_parser;
-import 'package:html/dom.dart' as dom; // 加前缀 dom
 import '../utils/aurora_gradient.dart';
 import '../widgets/clickable_words_text.dart';
-import 'dart:convert';
+import '../widgets/papunet_image_dialog.dart'; // New import
 
 class FlashcardDetailPage extends StatefulWidget {
   final Flashcard flashcard;
@@ -55,219 +50,10 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage>
     });
   }
 
-  Future<void> fetchPapunetImages(String word, BuildContext context) async {
-    final encodedWord = Uri.encodeComponent(word);
-    final url = Uri.parse('$apiBaseUrl/papunet-images/$encodedWord');
-
-    try {
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final images = data['images'] as List;
-
-        if (images.isEmpty) {
-          _showMessage(context, "没有找到相关图片");
-          return;
-        }
-
-        // 只取前 4 张
-        final displayImages = images.length > 4 ? images.sublist(0, 4) : images;
-
-        int currentPage = 0;
-        PageController pageController = PageController();
-
-        showDialog(
-          context: context,
-          builder: (BuildContext dialogContext) {
-            return StatefulBuilder(
-              builder: (context, setState) {
-                return AlertDialog(
-                  contentPadding: EdgeInsets.zero,
-                  content: SizedBox(
-                    width: double.maxFinite,
-                    height:
-                        MediaQuery.of(context).size.width * 0.8 +
-                        50, // Add space for buttons
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: PageView.builder(
-                            controller: pageController,
-                            itemCount: displayImages.length,
-                            onPageChanged: (index) {
-                              setState(() {
-                                currentPage = index;
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              final image = displayImages[index];
-                              return Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: Image.network(
-                                      image['url'],
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    child: Container(
-                                      color: Colors.black54,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 4,
-                                        horizontal: 8,
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          const Text(
-                                            "Kuva: Papunet / www.papunet.net",
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.white,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(width: 24), // Spacer
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(
-                            displayImages.length,
-                            (index) => Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              width: currentPage == index ? 12 : 8,
-                              height: currentPage == index ? 12 : 8,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: currentPage == index
-                                    ? Colors.blue
-                                    : Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Buttons row at the bottom
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(
-                                onPressed: () async {
-                                  try {
-                                    final image = displayImages[currentPage];
-                                    // Update the current flashcard with the selected image
-                                    final flashcardBox =
-                                        await Hive.openBox<Flashcard>(
-                                          'flashcards',
-                                        );
-                                    final currentFlashcard =
-                                        _flashcards![_currentIndex];
-                                    final boxList = flashcardBox.values
-                                        .toList();
-                                    int actualIndex = -1;
-                                    for (int i = 0; i < boxList.length; i++) {
-                                      if (boxList[i].word ==
-                                              currentFlashcard.word &&
-                                          boxList[i].pos ==
-                                              currentFlashcard.pos) {
-                                        actualIndex = i;
-                                        break;
-                                      }
-                                    }
-                                    if (actualIndex != -1) {
-                                      final updatedFlashcard = Flashcard(
-                                        word: currentFlashcard.word,
-                                        pos: currentFlashcard.pos,
-                                        definition: currentFlashcard.definition,
-                                        example: currentFlashcard.example,
-                                        createdDate:
-                                            currentFlashcard.createdDate,
-                                        nextReviewDate: currentFlashcard.nextReviewDate, // Keep existing nextReviewDate
-                                        isLearned: currentFlashcard.isLearned,
-                                        imageUrl: image['url'],
-                                      );
-                                      await flashcardBox.putAt(
-                                        actualIndex,
-                                        updatedFlashcard,
-                                      );
-
-                                      // Update the flashcard in the current view
-                                      setState(() {
-                                        _flashcards![_currentIndex] =
-                                            updatedFlashcard;
-                                      });
-
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              'Kuva lisätty sanakorttiin',
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                      // Close the dialog after selecting the image
-                                      Navigator.pop(dialogContext);
-                                    }
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Virhe kuvan lisäämisessä: ${e.toString()}',
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                },
-                                child: const Text('Lisää kuva'),
-                              ),
-                              TextButton(
-                                onPressed: () => Navigator.pop(dialogContext),
-                                child: const Text('Sulje'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
-      } else {
-        _showMessage(context, "请求出错: ${response.statusCode}");
-      }
-    } catch (e) {
-      _showMessage(context, "网络错误: $e");
-    }
-  }
-
-  void _showMessage(BuildContext context, String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _updateFlashcardInList(Flashcard updatedFlashcard) {
+    setState(() {
+      _flashcards![_currentIndex] = updatedFlashcard;
+    });
   }
 
   @override
@@ -363,87 +149,7 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage>
                 const SizedBox(height: 16),
                 // 学会按钮
                 ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      if (_flashcards == null || _flashcards!.isEmpty) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Ei kortteja saatavilla'),
-                            ),
-                          );
-                        }
-                        return;
-                      }
-                      if (_currentIndex < 0 ||
-                          _currentIndex >= _flashcards!.length) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Virheellinen kortin indeksi'),
-                            ),
-                          );
-                        }
-                        return;
-                      }
-                      final flashcardBox = await Hive.openBox<Flashcard>(
-                        'flashcards',
-                      );
-                      final currentCard = _flashcards![_currentIndex];
-                      final boxList = flashcardBox.values.toList();
-                      int actualIndex = -1;
-                      for (int i = 0; i < boxList.length; i++) {
-                        if (boxList[i].word == currentCard.word &&
-                            boxList[i].pos == currentCard.pos) {
-                          actualIndex = i;
-                          break;
-                        }
-                      }
-                      if (actualIndex == -1 || actualIndex >= boxList.length) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Korttia ei löytynyt tai virheellinen indeksi',
-                              ),
-                            ),
-                          );
-                        }
-                        return;
-                      }
-                      final updatedFlashcard = Flashcard(
-                        word: currentCard.word,
-                        pos: currentCard.pos,
-                        definition: currentCard.definition,
-                        example: currentCard.example,
-                        createdDate: currentCard.createdDate,
-                        nextReviewDate: currentCard.nextReviewDate, // Keep existing nextReviewDate
-                        isLearned: currentCard.isLearned,
-                        imageUrl: currentCard.imageUrl,
-                      );
-                      await flashcardBox.putAt(actualIndex, updatedFlashcard);
-                      setState(() {
-                        _flashcards![_currentIndex] = updatedFlashcard;
-                      });
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              updatedFlashcard.isLearned
-                                  ? 'Merkitty opituksi'
-                                  : 'Merkitty ei-opituksi',
-                            ),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Virhe: ${e.toString()}')),
-                        );
-                      }
-                    }
-                  },
+                  onPressed: _toggleLearnedStatus,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _flashcards![_currentIndex].isLearned
                         ? Colors.green
@@ -470,6 +176,87 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage>
         ),
       ),
     );
+  }
+
+  Future<void> _toggleLearnedStatus() async {
+    try {
+      if (_flashcards == null || _flashcards!.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Ei kortteja saatavilla'),
+            ),
+          );
+        }
+        return;
+      }
+      if (_currentIndex < 0 || _currentIndex >= _flashcards!.length) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Virheellinen kortin indeksi'),
+            ),
+          );
+        }
+        return;
+      }
+      final flashcardBox = await Hive.openBox<Flashcard>(
+        'flashcards',
+      );
+      final currentCard = _flashcards![_currentIndex];
+      final boxList = flashcardBox.values.toList();
+      int actualIndex = -1;
+      for (int i = 0; i < boxList.length; i++) {
+        if (boxList[i].word == currentCard.word &&
+            boxList[i].pos == currentCard.pos) {
+          actualIndex = i;
+          break;
+        }
+      }
+      if (actualIndex == -1 || actualIndex >= boxList.length) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Korttia ei löytynyt tai virheellinen indeksi',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+      final updatedFlashcard = Flashcard(
+        word: currentCard.word,
+        pos: currentCard.pos,
+        definition: currentCard.definition,
+        example: currentCard.example,
+        createdDate: currentCard.createdDate,
+        nextReviewDate: currentCard.nextReviewDate, // Keep existing nextReviewDate
+        isLearned: !currentCard.isLearned, // Toggle isLearned
+        imageUrl: currentCard.imageUrl,
+      );
+      await flashcardBox.putAt(actualIndex, updatedFlashcard);
+      setState(() {
+        _flashcards![_currentIndex] = updatedFlashcard;
+      });
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              updatedFlashcard.isLearned
+                  ? 'Merkitty opituksi'
+                  : 'Merkitty ei-opituksi',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Virhe: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   Widget _buildFlashcardView(Flashcard flashcard) {
@@ -613,7 +400,19 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage>
               children: [
                 IconButton(
                   icon: const Icon(Icons.image, color: Colors.white, size: 20),
-                  onPressed: () => fetchPapunetImages(flashcard.word, context),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext dialogContext) {
+                        return PapunetImageDialog(
+                          word: flashcard.word,
+                          currentFlashcard: flashcard,
+                          currentFlashcardIndex: _currentIndex,
+                          onImageSelected: _updateFlashcardInList,
+                        );
+                      },
+                    );
+                  },
                 ),
                 IconButton(
                   icon: const Icon(
