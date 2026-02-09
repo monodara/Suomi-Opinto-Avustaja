@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/models/saved_word.dart';
-import 'package:hive/hive.dart';
+import 'package:frontend/repositories/word_repository.dart';
 
 class WordDefinitionDialog extends StatefulWidget {
   final String displayWord;
@@ -34,11 +34,10 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
   }
 
   Future<void> _checkSavedStatus() async {
-    final box = await Hive.openBox<SavedWord>('wordbook');
     final map = <String, bool>{};
     for (var part in widget.parts) {
       final word = part['word'] ?? '';
-      final exists = box.values.any((w) => w.word == word);
+      final exists = await WordRepository.instance.isWordSaved(word);
       map[word] = exists;
     }
     setState(() {
@@ -51,34 +50,17 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
     String pos,
     List<dynamic> meanings,
   ) async {
-    final box = await Hive.openBox<SavedWord>('wordbook');
     final alreadyExists = _isSavedMap[word] ?? false;
 
     if (alreadyExists) {
       // Remove
-      final keyToDelete = box.keys.firstWhere(
-        (key) => box.get(key)?.word == word,
-        orElse: () => null,
-      );
-      if (keyToDelete != null) {
-        await box.delete(keyToDelete);
-      }
+      await WordRepository.instance.deleteWord(word);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Poistettu sanakirjasta: $word')));
     } else {
       // Add
-      final definition = meanings.isNotEmpty
-          ? meanings[0]['definition'] ?? ''
-          : '';
-      final example = meanings.isNotEmpty ? meanings[0]['example'] ?? '' : '';
-      final savedWord = SavedWord(
-        word: word,
-        pos: pos,
-        definition: definition,
-        example: example,
-      );
-      await box.add(savedWord);
+      await WordRepository.instance.saveWord(word, pos, meanings);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Lisätty sanakirjaan: $word')));

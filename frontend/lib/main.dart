@@ -15,6 +15,7 @@ import 'pages/flashcard_list.dart';
 import 'models/news_item.dart';
 import 'config.dart';
 import 'utils/aurora_gradient.dart';
+import 'package:frontend/services/api_service.dart';
 import 'utils/navigation_controller.dart';
 
 void main() async {
@@ -27,6 +28,7 @@ void main() async {
   try {
     await Hive.deleteBoxFromDisk('wordbook');
     await Hive.deleteBoxFromDisk('saved_articles');
+    await Hive.deleteBoxFromDisk('flashcards'); // Added this line
   } catch (e) {
     // Ignore deletion errors
   }
@@ -45,20 +47,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Future<NewsItem?> fetchNews() async {
-    try {
-      final response = await http.get(Uri.parse('$apiBaseUrl/latest-news'));
-
-      if (response.statusCode == 200) {
-        return NewsItem.fromJson(json.decode(utf8.decode(response.bodyBytes)));
-      } else {
-        return null;
-      }
-    } catch (e) {
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -71,14 +59,13 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: MainApp(fetchNews: fetchNews),
+      home: const MainApp(),
     );
   }
 }
 
 class MainApp extends StatefulWidget {
-  final Future<NewsItem?> Function() fetchNews;
-  const MainApp({super.key, required this.fetchNews});
+  const MainApp({super.key});
 
   @override
   State<MainApp> createState() => _MainAppState();
@@ -112,7 +99,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomePage(fetchNews: widget.fetchNews),
+      HomePage(),
       const WordbookPage(),
       const FlashcardListPage(),
     ];

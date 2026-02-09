@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/models/news_item.dart';
-import 'package:frontend/models/saved_article.dart';
 import 'package:frontend/utils/navigation_controller.dart';
-import 'package:hive/hive.dart';
+import 'package:frontend/repositories/article_repository.dart';
 import '../widgets/clickable_words_text.dart';
 import '../utils/aurora_gradient.dart';
-import '../main.dart';
 
 class NewsDetailPage extends StatelessWidget {
   final NewsItem article;
@@ -31,17 +29,7 @@ class NewsDetailPage extends StatelessWidget {
             icon: const Icon(Icons.save, color: Colors.white),
             onPressed: () async {
               try {
-                final savedArticlesBox = await Hive.openBox<SavedArticle>(
-                  'saved_articles',
-                );
-
-                // Check if article has already been saved
-                final existingArticles = savedArticlesBox.values.toList();
-                final isAlreadySaved = existingArticles.any(
-                  (savedArticle) =>
-                      savedArticle.title == article.title &&
-                      savedArticle.date == article.date,
-                );
+                final isAlreadySaved = await ArticleRepository.instance.isArticleSaved(article);
 
                 if (isAlreadySaved) {
                   if (context.mounted) {
@@ -54,30 +42,7 @@ class NewsDetailPage extends StatelessWidget {
                   return;
                 }
 
-                // Convert article content to string
-                final contentBuffer = StringBuffer();
-                for (var item in article.content) {
-                  contentBuffer.write(item['text']);
-                  contentBuffer.write('\n\n');
-                }
-
-                final savedArticle = SavedArticle(
-                  title: article.title,
-                  date: article.date,
-                  content: contentBuffer.toString(),
-                  image: article.image,
-                  savedDate: DateTime.now(),
-                  structuredContent: article.content
-                      .map(
-                        (item) => {
-                          'type': item['type'] ?? 'p',
-                          'text': item['text'] ?? '',
-                        },
-                      )
-                      .toList(),
-                );
-
-                await savedArticlesBox.add(savedArticle);
+                await ArticleRepository.instance.saveArticle(article);
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(

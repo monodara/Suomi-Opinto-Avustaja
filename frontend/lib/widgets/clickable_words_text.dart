@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'package:frontend/services/api_service.dart';
 import 'word_defination_dialog.dart';
 import '../config.dart';
 
@@ -10,32 +11,6 @@ class ClickableWordsText extends StatelessWidget {
   final String text;
 
   const ClickableWordsText({super.key, required this.text});
-
-  Future<Map<String, dynamic>> lookupWordData(String word) async {
-    final box = Hive.box('word_cache');
-
-    // if found in cache, return directly
-    if (box.containsKey(word)) {
-      return Map<String, dynamic>.from(box.get(word));
-    }
-
-    try {
-      final response = await http.get(
-        Uri.parse('$apiBaseUrl/define?word=$word'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        box.put(word, data); // save in cache/Hive
-        return data;
-      } else {
-        return {"word": word, "parts": [], "feats": null};
-      }
-    } catch (e) {
-      // offline also can't find
-      return {"word": word, "parts": [], "feats": null};
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +27,7 @@ class ClickableWordsText extends StatelessWidget {
               barrierDismissible: false,
               builder: (_) => const Center(child: CircularProgressIndicator()),
             );
-            final data = await lookupWordData(word);
+            final data = await ApiService.instance.lookupWordData(word);
 
             Navigator.pop(context); // close loading dialog
 

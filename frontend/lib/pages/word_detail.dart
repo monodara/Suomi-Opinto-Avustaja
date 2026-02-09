@@ -63,6 +63,7 @@ class WordDetailPage extends StatelessWidget {
                       definition: word.definition,
                       example: word.example,
                       createdDate: DateTime.now(),
+                      nextReviewDate: DateTime.now(), // Added nextReviewDate
                       imageUrl: word.imageUrl, // Include the image URL from the saved word
                     );
                     

@@ -198,6 +198,7 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage>
                                         example: currentFlashcard.example,
                                         createdDate:
                                             currentFlashcard.createdDate,
+                                        nextReviewDate: currentFlashcard.nextReviewDate, // Keep existing nextReviewDate
                                         isLearned: currentFlashcard.isLearned,
                                         imageUrl: image['url'],
                                       );
@@ -416,7 +417,9 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage>
                         definition: currentCard.definition,
                         example: currentCard.example,
                         createdDate: currentCard.createdDate,
-                        isLearned: !currentCard.isLearned,
+                        nextReviewDate: currentCard.nextReviewDate, // Keep existing nextReviewDate
+                        isLearned: currentCard.isLearned,
+                        imageUrl: currentCard.imageUrl,
                       );
                       await flashcardBox.putAt(actualIndex, updatedFlashcard);
                       setState(() {

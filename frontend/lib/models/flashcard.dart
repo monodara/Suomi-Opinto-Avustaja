@@ -8,30 +8,46 @@ class Flashcard extends HiveObject {
   String word;
 
   @HiveField(1)
-  String pos;
-
-  @HiveField(2)
   String definition;
 
-  @HiveField(3)
+  @HiveField(2)
   String example;
 
+  @HiveField(3)
+  DateTime nextReviewDate;
+
   @HiveField(4)
-  DateTime createdDate;
+  int interval; // in days
 
   @HiveField(5)
-  bool isLearned;
+  int repetitions;
 
   @HiveField(6)
+  double easeFactor;
+
+  @HiveField(7)
+  bool isLearned;
+
+  @HiveField(8)
+  String pos;
+
+  @HiveField(9)
+  DateTime createdDate;
+
+  @HiveField(10)
   String? imageUrl;
 
   Flashcard({
     required this.word,
-    required this.pos,
     required this.definition,
     required this.example,
-    DateTime? createdDate,
+    required this.nextReviewDate,
+    this.interval = 1,
+    this.repetitions = 0,
+    this.easeFactor = 2.5,
     this.isLearned = false,
+    required this.pos,
+    required this.createdDate,
     this.imageUrl,
-  }) : createdDate = createdDate ?? DateTime.now();
+  });
 }
