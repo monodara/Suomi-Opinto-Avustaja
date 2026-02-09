@@ -23,7 +23,7 @@ void main() async {
 
   final appDocDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocDir.path);
-  
+
   // Clean up old Hive data to avoid type conflicts
   try {
     await Hive.deleteBoxFromDisk('wordbook');
@@ -32,7 +32,7 @@ void main() async {
   } catch (e) {
     // Ignore deletion errors
   }
-  
+
   Hive.registerAdapter(SavedWordAdapter());
   Hive.registerAdapter(SavedArticleAdapter());
   Hive.registerAdapter(FlashcardAdapter());
@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
-          elevation: 0,
+          elevation: 2,
         ),
       ),
       home: const MainApp(),
@@ -98,32 +98,29 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      HomePage(),
-      const WordbookPage(),
-      const FlashcardListPage(),
-    ];
+    final pages = [HomePage(), const WordbookPage(), const FlashcardListPage()];
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: AuroraGradient.createAuroraGradient(),
-          ),
-          child: AppBar(
-            title: const Text(
+      appBar: AppBar(
+        backgroundColor: Colors.white, // White background
+        foregroundColor: Colors.black, // Black foreground for icons/text
+        elevation: 2,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text(
               'SisuHyy',
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
+                color: Colors.blue, // Dark blue color for the title
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-          ),
+            Text(
+              'Paranna suomen kieltä päivä päivältä',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
         ),
       ),
       body: _selectedArticle == null
@@ -150,10 +147,7 @@ class _MainAppState extends State<MainApp> {
             icon: Icon(Icons.bookmark),
             label: 'Sanakirja',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.style),
-            label: 'Sanakortit',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.style), label: 'Sanakortit'),
         ],
       ),
     );
