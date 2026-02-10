@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
 import 'package:frontend/services/api_service.dart';
-import 'word_defination_dialog.dart';
-import '../config.dart';
+import 'package:frontend/widgets/word_defination_dialog.dart';
 
-class ClickableWordsText extends StatelessWidget {
+class ClickableWordsText extends StatefulWidget {
   final String text;
 
   const ClickableWordsText({super.key, required this.text});
 
   @override
+  State<ClickableWordsText> createState() => _ClickableWordsTextState();
+}
+
+class _ClickableWordsTextState extends State<ClickableWordsText> {
+  String? _selectedWord; // State to hold the currently selected word
+
+  @override
   Widget build(BuildContext context) {
-    final words = text.split(RegExp(r'\s+'));
+    final words = widget.text.split(RegExp(r'\s+'));
 
     return Wrap(
       spacing: 4,
       runSpacing: 4,
       children: words.map((word) {
+        final isHighlighted = _selectedWord == word;
         return GestureDetector(
           onLongPress: () async {
+            setState(() {
+              _selectedWord = word; // Set the selected word
+            });
+
             showDialog(
               context: context,
               barrierDismissible: false,
@@ -29,6 +36,7 @@ class ClickableWordsText extends StatelessWidget {
             );
             final data = await ApiService.instance.lookupWordData(word);
 
+            if (!context.mounted) return; // Add this check
             Navigator.pop(context); // close loading dialog
 
             // Type-safe conversion
@@ -42,7 +50,8 @@ class ClickableWordsText extends StatelessWidget {
                 : null;
             final displayWord = data['word'] ?? word;
 
-            showDialog(
+            if (!context.mounted) return; // Add this check
+            await showDialog( // Use await to know when dialog is dismissed
               context: context,
               builder: (context) => WordDefinitionDialog(
                 displayWord: displayWord,
@@ -51,12 +60,17 @@ class ClickableWordsText extends StatelessWidget {
                 feats: feats,
               ),
             );
+
+            setState(() {
+              _selectedWord = null; // Clear the selected word when dialog is dismissed
+            });
           },
           child: Text(
             word,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.black87,
               decoration: TextDecoration.none,
+              backgroundColor: isHighlighted ? Colors.yellow.withOpacity(0.5) : Colors.transparent, // Highlight
             ),
           ),
         );
