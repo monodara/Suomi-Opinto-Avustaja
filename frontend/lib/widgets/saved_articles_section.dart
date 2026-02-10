@@ -12,8 +12,10 @@ class SavedArticlesSection extends StatelessWidget {
       future: Hive.openBox<SavedArticle>('saved_articles'),
       builder: (context, savedSnapshot) {
         if (savedSnapshot.hasData) {
-          final savedArticles =
-              savedSnapshot.data!.values.toList().reversed.toList();
+          final savedArticles = savedSnapshot.data!.values
+              .toList()
+              .reversed
+              .toList();
 
           if (savedArticles.isNotEmpty) {
             return Column(
@@ -21,10 +23,7 @@ class SavedArticlesSection extends StatelessWidget {
               children: [
                 const Text(
                   'Tallennetut artikkelit',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 SizedBox(
@@ -74,7 +73,7 @@ class SavedArticlesSection extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '${savedArticle.savedDate.day}.${savedArticle.savedDate.month}.${savedArticle.savedDate.year}',
+                                    'Tallennettu: ${savedArticle.savedDate.day}.${savedArticle.savedDate.month}.${savedArticle.savedDate.year}',
                                     style: const TextStyle(
                                       color: Colors.grey,
                                       fontSize: 12,

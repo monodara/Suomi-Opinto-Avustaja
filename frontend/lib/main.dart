@@ -102,51 +102,53 @@ class _MainAppState extends State<MainApp> {
     final pages = [HomePage(), const WordbookPage(), const FlashcardListPage()];
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white, // White background
-        foregroundColor: Colors.black, // Black foreground for icons/text
-        elevation: 0, // Remove AppBar's default elevation
-        toolbarHeight: 80.0, // Adjust height to accommodate custom title
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            color: Colors.white, // Ensure background color for shadow
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2), // Subtle shadow color
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: const Offset(0, 2), // changes position of shadow
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 20.0), // Custom left padding to match card
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, // Align children to the left
-                mainAxisAlignment: MainAxisAlignment.center, // Center vertically
-                children: const [
-                  Text(
-                    'SisuHyy',
-                    style: TextStyle(
-                      color: Color(0xFF4285F4), // Blue from achievements card
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+      appBar: _selectedArticle == null
+          ? AppBar(
+              backgroundColor: Colors.white, // White background
+              foregroundColor: Colors.black, // Black foreground for icons/text
+              elevation: 2.0, // Subtle shadow
+              toolbarHeight: 80.0, // Adjust height to accommodate custom title
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white, // Ensure background color for shadow
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2), // Subtle shadow color
+                      spreadRadius: 1,
+                      blurRadius: 3,
+                      offset: const Offset(0, 2), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20.0), // Custom left padding to match card
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start, // Align children to the left
+                      mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+                      children: const [
+                        Text(
+                          'SisuHyy',
+                          style: TextStyle(
+                            color: Color(0xFF4285F4), // Blue from achievements card
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Finnish Language Learning',
+                          style: TextStyle(
+                            color: Colors.grey, // Grey from screenshot
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    'Finnish Language Learning',
-                    style: TextStyle(
-                      color: Colors.grey, // Grey from screenshot
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
-      ),
+            )
+          : null, // Hide AppBar when _selectedArticle is not null
       body: _selectedArticle == null
           ? pages[_currentIndex]
           : NewsDetailPage(article: _selectedArticle!),
@@ -171,7 +173,10 @@ class _MainAppState extends State<MainApp> {
             icon: Icon(Icons.bookmark),
             label: 'Sanakirja',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.style), label: 'Sanakortit'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.style),
+            label: 'Sanakortit',
+          ),
         ],
       ),
     );
