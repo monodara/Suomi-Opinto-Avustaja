@@ -21,7 +21,7 @@ class SavedArticlesSection extends StatelessWidget {
               children: [
                 const Padding(
                   padding: EdgeInsets.symmetric(
-                    horizontal: 16.0,
+                    horizontal: 20.0, // Match padding of other sections
                     vertical: 8.0,
                   ),
                   child: Text(

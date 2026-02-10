@@ -106,7 +106,7 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 16),
               LatestNewsArticleCard(article: article),
               const SizedBox(height: 32),
-              const SavedArticlesSection(),
+              const SavedArticlesSection(), // Re-add the SavedArticlesSection
             ],
           );
         }

@@ -104,32 +104,45 @@ class _MainAppState extends State<MainApp> {
       appBar: AppBar(
         backgroundColor: Colors.white, // White background
         foregroundColor: Colors.black, // Black foreground for icons/text
-        elevation: 2.0, // Subtle shadow, as requested
-        titleSpacing: 0.0, // Remove default title spacing
-        title: Padding(
-          padding: const EdgeInsets.only(
-            left: 20.0,
-          ), // Custom left padding to match card
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start, // Align children to the left
-            children: const [
-              Text(
-                'SisuHyy',
-                style: TextStyle(
-                  color: Color(0xFF4285F4), // Blue from achievements card
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'Finnish Language Learning',
-                style: TextStyle(
-                  color: Colors.grey, // Grey from screenshot
-                  fontSize: 12,
-                ),
+        elevation: 0, // Remove AppBar's default elevation
+        toolbarHeight: 80.0, // Adjust height to accommodate custom title
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            color: Colors.white, // Ensure background color for shadow
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2), // Subtle shadow color
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: const Offset(0, 2), // changes position of shadow
               ),
             ],
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 20.0), // Custom left padding to match card
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, // Align children to the left
+                mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+                children: const [
+                  Text(
+                    'SisuHyy',
+                    style: TextStyle(
+                      color: Color(0xFF4285F4), // Blue from achievements card
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Finnish Language Learning',
+                    style: TextStyle(
+                      color: Colors.grey, // Grey from screenshot
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

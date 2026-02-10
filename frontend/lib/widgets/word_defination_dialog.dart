@@ -1,6 +1,4 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:frontend/models/saved_word.dart';
 import 'package:frontend/repositories/word_repository.dart';
 
 class WordDefinitionDialog extends StatefulWidget {
@@ -55,12 +53,14 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
     if (alreadyExists) {
       // Remove
       await WordRepository.instance.deleteWord(word);
+      if (!mounted) return; // Add this check
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Poistettu sanakirjasta: $word')));
     } else {
       // Add
       await WordRepository.instance.saveWord(word, pos, meanings);
+      if (!mounted) return; // Add this check
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Lisätty sanakirjaan: $word')));
