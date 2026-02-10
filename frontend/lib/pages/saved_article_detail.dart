@@ -12,20 +12,24 @@ class SavedArticleDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: AuroraGradient.createAuroraGradient(),
-          ),
-          child: AppBar(
-            title: const Text('SisuHyy', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent, // Set to transparent to show flexibleSpace gradient
+        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text('SisuHyy', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF4285F4), // Start color (original blue)
+                Color(0xFF2A65CC), // Slightly darker blue for gradient effect
+              ],
             ),
           ),
         ),

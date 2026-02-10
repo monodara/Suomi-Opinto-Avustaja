@@ -14,9 +14,9 @@ class NewsDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(
-          0xFF4285F4,
-        ), // Use deep blue from aurora gradient
+        backgroundColor: Colors.transparent, // Set to transparent to show flexibleSpace gradient
+        foregroundColor: Colors.white,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -62,6 +62,18 @@ class NewsDetailPage extends StatelessWidget {
             },
           ),
         ],
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF4285F4), // Start color (original blue)
+                Color(0xFF2A65CC), // Slightly darker blue for gradient effect
+              ],
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

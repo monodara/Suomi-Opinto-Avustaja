@@ -15,11 +15,18 @@ class TodaysAchievementsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF4285F4), // A shade of blue
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF4285F4), // Start color (original blue)
+            Color(0xFF2A65CC), // Slightly darker blue for gradient effect
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withAlpha((0.3 * 255).round()),
             spreadRadius: 1,
             blurRadius: 2,
             offset: const Offset(0, 5),

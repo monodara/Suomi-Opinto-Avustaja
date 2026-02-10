@@ -54,6 +54,11 @@ class SavedArticlesSection extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  if (index > 0) // Add a line before the title, except for the first one
+                                    const Padding(
+                                      padding: EdgeInsets.only(bottom: 8.0),
+                                      child: Divider(height: 1, thickness: 1, color: Colors.grey),
+                                    ),
                                   Text(
                                     savedArticle.title,
                                     style: const TextStyle(
