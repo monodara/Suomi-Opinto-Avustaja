@@ -45,9 +45,9 @@ class _ClickableWordsTextState extends State<ClickableWordsText> {
                 ? partsRaw.map((e) => Map<String, dynamic>.from(e)).toList()
                 : <Map<String, dynamic>>[];
 
-            final feats = data['feats'] != null
-                ? Map<String, dynamic>.from(data['feats'])['feats'] as String?
-                : null;
+            final featsRaw = data['feats'];
+            final feats = featsRaw is List ? featsRaw.cast<String>() : null; // Cast to List<String>
+
             final displayWord = data['word'] ?? word;
 
             if (!context.mounted) return; // Add this check
@@ -57,7 +57,7 @@ class _ClickableWordsTextState extends State<ClickableWordsText> {
                 displayWord: displayWord,
                 parts: parts,
                 combinedWord: word,
-                feats: feats,
+                feats: feats, // Pass List<String>?
               ),
             );
 

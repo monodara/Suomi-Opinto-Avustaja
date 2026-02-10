@@ -5,7 +5,7 @@ class WordDefinitionDialog extends StatefulWidget {
   final String displayWord;
   final List<Map<String, dynamic>> parts;
   final String combinedWord;
-  final String? feats;
+  final List<String>? feats; // Changed to List<String>
   final VoidCallback? onWordBookUpdated; // New callback
 
   const WordDefinitionDialog({
@@ -13,7 +13,7 @@ class WordDefinitionDialog extends StatefulWidget {
     required this.displayWord,
     required this.parts,
     required this.combinedWord,
-    this.feats,
+    this.feats, // Now List<String>
     this.onWordBookUpdated, // Constructor parameter
   });
 
@@ -88,7 +88,7 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
         style: const TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
-          color: Colors.blue,
+          color: Colors.black87, // Darker, more neutral color
         ),
       ),
       content: SizedBox(
@@ -114,13 +114,25 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Flexible(
-                              child: Text(
-                                '$word: $pos',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
+                              child: Row( // Use Row to display word and pos
+                                children: [
+                                  Text(
+                                    word,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  Text(
+                                    ': $pos', // Separate pos text
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.normal,
+                                      color: Colors.grey[600], // Differentiate POS color
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             IconButton(
@@ -142,37 +154,29 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
                         final definition = m['definition'] ?? '';
                         final example = m['example'] ?? '';
 
-                        return Container(
-                          margin: const EdgeInsets.only(left: 12.0, bottom: 8.0),
-                          padding: const EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[50],
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                definition,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  height: 1.4,
-                                ),
+                        return Column( // Removed Container decoration
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              definition,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                height: 1.4,
                               ),
-                              if (example.isNotEmpty)
-                                Container(
-                                  margin: const EdgeInsets.only(top: 6.0),
-                                  child: Text(
-                                    example,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                            ),
+                            if (example.isNotEmpty)
+                              Container(
+                                margin: const EdgeInsets.only(top: 6.0),
+                                                                  child: Text(
+                                                                    example,
+                                                                    style: const TextStyle(
+                                                                      fontSize: 14,
+                                                                      // Removed fontStyle: FontStyle.italic,
+                                                                      color: Colors.black54, // Darker color for better readability
+                                                                    ),
+                                                                  ),
+                                                                ),                            const SizedBox(height: 8), // Spacing between meanings
+                          ],
                         );
                       }),
                     ],
@@ -190,22 +194,19 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: Colors.blue,
+                        color: Colors.black87, // Consistent with other titles
                       ),
                     ),
-                    if (widget.feats != null)
-                      Container(
-                        margin: const EdgeInsets.only(top: 4.0),
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          border: Border.all(color: Colors.blue[200]!),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          widget.feats!,
-                          style: const TextStyle(fontSize: 14),
-                        ),
+                    if (widget.feats != null && widget.feats!.isNotEmpty)
+                      Column( // Removed Container decoration
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: widget.feats!.map((feat) => Padding(
+                          padding: const EdgeInsets.only(top: 4.0), // Spacing between features
+                          child: Text(
+                            feat,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        )).toList(),
                       ),
                   ],
                 ),
@@ -217,7 +218,10 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Sulje'),
+          child: const Text(
+            'Sulje',
+            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold), // Standard accent color
+          ),
         ),
       ],
     );

@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from app.services.tnpp_lookup import TnppLookupService
 from app.services.sanakirja_lookup import SanakirjaLookupService
 from app.dependencies import get_tnpp_lookup_service, get_sanakirja_lookup_service
+from app.utils.feature_parser import parse_feats # New import
 
 router = APIRouter()
 
@@ -17,7 +18,9 @@ async def define_word(
     # use TNPP model to analyze word form and lemma
     tnpp_result = tnpp_service.analyze_finnish_word(word)
     lemma_str = tnpp_result["lemma"]  # it can be like 'alennus#myynti'
-    feats = tnpp_result.get("features", "")
+    raw_feats_dict = tnpp_result.get("features", {}) # Get raw feats dictionary
+    raw_feats_string = raw_feats_dict.get("feats", "") # Extract the feats string
+    parsed_feats = parse_feats(raw_feats_string) # Parse feats
 
     # split each part in lemma
     lemmas = lemma_str.split("#") if lemma_str else []
@@ -36,7 +39,7 @@ async def define_word(
         content={
             "word": word,
             "parts": parts,
-            "feats": feats
+            "feats": parsed_feats # Include parsed feats
         },
         media_type="application/json; charset=utf-8"
     )
