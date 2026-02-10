@@ -19,17 +19,11 @@ class SavedArticlesSection extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 20.0, // Match padding of other sections
-                    vertical: 8.0,
-                  ),
-                  child: Text(
-                    'Tallennetut artikkelit',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                const Text(
+                  'Tallennetut artikkelit',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
