@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
       title: 'SisuHyy!',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        fontFamily: 'NotoSans', // Set NotoSans as the default font family
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,

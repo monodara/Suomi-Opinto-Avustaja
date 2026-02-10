@@ -15,7 +15,7 @@ class NewsDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(
-          0xFF0A2463,
+          0xFF4285F4,
         ), // Use deep blue from aurora gradient
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -29,7 +29,8 @@ class NewsDetailPage extends StatelessWidget {
             icon: const Icon(Icons.save, color: Colors.white),
             onPressed: () async {
               try {
-                final isAlreadySaved = await ArticleRepository.instance.isArticleSaved(article);
+                final isAlreadySaved = await ArticleRepository.instance
+                    .isArticleSaved(article);
 
                 if (isAlreadySaved) {
                   if (context.mounted) {
