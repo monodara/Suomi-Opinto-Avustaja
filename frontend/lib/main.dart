@@ -104,23 +104,33 @@ class _MainAppState extends State<MainApp> {
       appBar: AppBar(
         backgroundColor: Colors.white, // White background
         foregroundColor: Colors.black, // Black foreground for icons/text
-        elevation: 2,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
-              'SisuHyy',
-              style: TextStyle(
-                color: Colors.blue, // Dark blue color for the title
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        elevation: 2.0, // Subtle shadow, as requested
+        titleSpacing: 0.0, // Remove default title spacing
+        title: Padding(
+          padding: const EdgeInsets.only(
+            left: 20.0,
+          ), // Custom left padding to match card
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Align children to the left
+            children: const [
+              Text(
+                'SisuHyy',
+                style: TextStyle(
+                  color: Color(0xFF4285F4), // Blue from achievements card
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              'Paranna suomen kieltä päivä päivältä',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ],
+              Text(
+                'Finnish Language Learning',
+                style: TextStyle(
+                  color: Colors.grey, // Grey from screenshot
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       body: _selectedArticle == null
