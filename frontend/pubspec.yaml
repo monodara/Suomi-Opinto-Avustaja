@@ -18,6 +18,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   url_launcher: ^6.3.1
   provider: ^6.1.2
+  flutter_tts: ^4.0.2 # Added flutter_tts dependency
 
 dev_dependencies:
   flutter_test:
