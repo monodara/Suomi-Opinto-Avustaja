@@ -40,6 +40,7 @@ void main() async {
   await Hive.openBox<SavedWord>('wordbook');
   await Hive.openBox<SavedArticle>('saved_articles');
   await Hive.openBox<Flashcard>('flashcards');
+  await ApiService.instance.init(); // Initialize ApiService and its Hive boxes
 
   runApp(const MyApp());
 }
