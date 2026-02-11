@@ -223,7 +223,23 @@ class FlashcardWidget extends StatelessWidget {
                   height: 1.4,
                   color: Colors.black87,
                 ),
-                child: ClickableWordsText(text: flashcard.example),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: () {
+                    final paragraphText = flashcard.example;
+                    final words = paragraphText.split(RegExp(r'\s+'));
+                    int currentWordIndex = 0;
+                    return words.map((w) {
+                      final index = currentWordIndex++;
+                      return ClickableWordsText(
+                        word: w,
+                        paragraphText: paragraphText,
+                        wordIndex: index,
+                      );
+                    }).toList();
+                  }(),
+                ),
               ),
             ),
           ],

@@ -213,7 +213,23 @@ class WordDetailPage extends StatelessWidget {
                     height: 1.5,
                     color: Colors.black87,
                   ),
-                  child: ClickableWordsText(text: word.example),
+                  child: Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: () {
+                      final paragraphText = word.example;
+                      final words = paragraphText.split(RegExp(r'\s+'));
+                      int currentWordIndex = 0;
+                      return words.map((w) {
+                        final index = currentWordIndex++;
+                        return ClickableWordsText(
+                          word: w,
+                          paragraphText: paragraphText,
+                          wordIndex: index,
+                        );
+                      }).toList();
+                    }(),
+                  ),
                 ),
               ),
               const SizedBox(height: 24),

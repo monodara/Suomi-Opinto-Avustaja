@@ -79,24 +79,39 @@ class ArticleContentDisplay extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                                  ...structuredContent.map<Widget>((item) {
-                                    final text = item['text'] as String? ?? '';
-                                    if (text.trim().isEmpty) return Container(); // Skip empty text
-                                    
-                                    final isHeader = item['type'] == 'h1' || item['type'] == 'h2';
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: 12.0),
-                                      child: DefaultTextStyle(
-                                        style: TextStyle(
-                                          fontSize: isHeader ? 22 : 16,
-                                          fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
-                                          color: Colors.black87,
-                                          height: 1.5,
-                                        ),
-                                        child: ClickableWordsText(text: text.trim()),
-                                      ),
-                                    );
-                                  }),            ],
+              ...structuredContent.map<Widget>((item) {
+                final paragraphText = item['text'] as String? ?? '';
+                if (paragraphText.trim().isEmpty) return Container(); // Skip empty text
+
+                final isHeader = item['type'] == 'h1' || item['type'] == 'h2';
+                final words = paragraphText.split(RegExp(r'\s+'));
+                int currentWordIndex = 0;
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12.0),
+                  child: DefaultTextStyle(
+                    style: TextStyle(
+                      fontSize: isHeader ? 22 : 16,
+                      fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+                      color: Colors.black87,
+                      height: 1.5,
+                    ),
+                    child: Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: words.map((word) {
+                        final index = currentWordIndex++;
+                        return ClickableWordsText(
+                          word: word,
+                          paragraphText: paragraphText,
+                          wordIndex: index,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
           ), // Closing parenthesis for Column
         ), // Closing parenthesis for ConstrainedBox
       ), // Closing parenthesis for Center

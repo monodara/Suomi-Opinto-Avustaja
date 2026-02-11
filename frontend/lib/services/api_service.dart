@@ -48,4 +48,22 @@ class ApiService {
       return {"word": word, "parts": [], "feats": null};
     }
   }
+
+  Future<Map<String, dynamic>> segmentSentences(String text) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl/segment-sentences'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'text': text}),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to segment sentences: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error segmenting sentences: $e');
+    }
+  }
 }

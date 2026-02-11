@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import routes_defination, routes_news, routes_papunet
+from app.api import routes_defination, routes_news, routes_papunet, routes_sentence_analysis # New import
 import logging
 
 # Configure logging
@@ -13,6 +13,7 @@ app = FastAPI()
 app.include_router(routes_defination.router)
 app.include_router(routes_news.router)
 app.include_router(routes_papunet.router)
+app.include_router(routes_sentence_analysis.router) # Include the new router
 
 @app.get("/")
 async def root():

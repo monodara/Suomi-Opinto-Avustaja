@@ -24,3 +24,4 @@ urllib3==2.5.0
 uvicorn==0.35.0
 stanza==1.9.2
 playwright==1.40.0
+spacy
