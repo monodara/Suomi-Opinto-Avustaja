@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/news_item.dart';
 import 'package:frontend/utils/navigation_controller.dart';
 import 'package:frontend/repositories/article_repository.dart';
-import '../widgets/clickable_words_text.dart';
 import '../widgets/article_content_display.dart'; // New import
 
 class NewsDetailPage extends StatelessWidget {
@@ -14,7 +13,8 @@ class NewsDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // Set to transparent to show flexibleSpace gradient
+        backgroundColor: Colors
+            .transparent, // Set to transparent to show flexibleSpace gradient
         foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(

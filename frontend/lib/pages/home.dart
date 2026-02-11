@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/api_service.dart';
 import '../models/news_item.dart';
-import 'news_article.dart';
-import '../utils/aurora_gradient.dart';
-import '../models/saved_article.dart';
-import 'package:hive/hive.dart';
-import '../utils/navigation_controller.dart';
-import 'saved_article_detail.dart';
 import '../repositories/word_repository.dart'; // Import WordRepository
 import '../models/saved_word.dart'; // Import SavedWord
-import 'flashcard_list.dart'; // Import FlashcardListPage
 import '../widgets/todays_achievements_card.dart'; // New import
 import '../widgets/todays_vocabulary_section.dart'; // New import
 import '../widgets/latest_news_article_card.dart'; // New import

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:frontend/models/saved_word.dart';
-import '../utils/aurora_gradient.dart';
 import 'word_detail.dart';
 
 class WordbookPage extends StatefulWidget {

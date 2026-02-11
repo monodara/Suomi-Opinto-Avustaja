@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/saved_article.dart';
-import '../utils/aurora_gradient.dart';
-import '../widgets/clickable_words_text.dart';
 import '../widgets/article_content_display.dart'; // New import
 
 class SavedArticleDetailPage extends StatelessWidget {
@@ -13,14 +11,22 @@ class SavedArticleDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent, // Set to transparent to show flexibleSpace gradient
+        backgroundColor: Colors
+            .transparent, // Set to transparent to show flexibleSpace gradient
         foregroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('SisuHyy', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'SisuHyy',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -46,10 +52,7 @@ class SavedArticleDetailPage extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Tallennettu: ${article.savedDate.day}.${article.savedDate.month}.${article.savedDate.year}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
             ],
           ),

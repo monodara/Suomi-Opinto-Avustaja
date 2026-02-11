@@ -3,8 +3,6 @@ import 'package:frontend/models/saved_article.dart';
 import 'package:frontend/models/saved_word.dart';
 import 'package:frontend/models/flashcard.dart';
 import 'package:frontend/pages/news_article.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -13,8 +11,6 @@ import 'pages/home.dart';
 import 'pages/wordbook.dart';
 import 'pages/flashcard_list.dart';
 import 'models/news_item.dart';
-import 'config.dart';
-import 'utils/aurora_gradient.dart';
 import 'package:frontend/services/api_service.dart';
 import 'utils/navigation_controller.dart';
 
@@ -114,7 +110,9 @@ class _MainAppState extends State<MainApp> {
                   color: Colors.white, // Ensure background color for shadow
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.2), // Subtle shadow color
+                      color: Colors.grey.withOpacity(
+                        0.2,
+                      ), // Subtle shadow color
                       spreadRadius: 1,
                       blurRadius: 3,
                       offset: const Offset(0, 2), // changes position of shadow
@@ -123,15 +121,21 @@ class _MainAppState extends State<MainApp> {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 20.0), // Custom left padding to match card
+                    padding: const EdgeInsets.only(
+                      left: 20.0,
+                    ), // Custom left padding to match card
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start, // Align children to the left
-                      mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+                      crossAxisAlignment: CrossAxisAlignment
+                          .start, // Align children to the left
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Center vertically
                       children: const [
                         Text(
                           'SisuHyy',
                           style: TextStyle(
-                            color: Color(0xFF4285F4), // Blue from achievements card
+                            color: Color(
+                              0xFF4285F4,
+                            ), // Blue from achievements card
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
@@ -174,10 +178,7 @@ class _MainAppState extends State<MainApp> {
             icon: Icon(Icons.bookmark),
             label: 'Sanakirja',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.style),
-            label: 'Sanakortit',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.style), label: 'Sanakortit'),
         ],
       ),
     );
