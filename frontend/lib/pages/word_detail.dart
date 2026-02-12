@@ -4,11 +4,41 @@ import 'package:frontend/models/flashcard.dart';
 import 'package:hive/hive.dart';
 import '../utils/aurora_gradient.dart';
 import '../widgets/clickable_words_text.dart';
+import 'package:flutter_tts/flutter_tts.dart'; // New import for TTS
 
-class WordDetailPage extends StatelessWidget {
+class WordDetailPage extends StatefulWidget {
   final SavedWord word;
 
   const WordDetailPage({super.key, required this.word});
+
+  @override
+  State<WordDetailPage> createState() => _WordDetailPageState();
+}
+
+class _WordDetailPageState extends State<WordDetailPage> {
+  late FlutterTts flutterTts; // Declare FlutterTts
+
+  @override
+  void initState() {
+    super.initState();
+    flutterTts = FlutterTts(); // Initialize FlutterTts
+    _initTts();
+  }
+
+  Future<void> _initTts() async {
+    await flutterTts.setLanguage("fi-FI"); // Set language to Finnish
+    await flutterTts.setSpeechRate(0.5); // Set speech rate
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.speak(text);
+  }
+
+  @override
+  void dispose() {
+    flutterTts.stop(); // Stop TTS if speaking
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,18 +46,17 @@ class WordDetailPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60.0),
         child: Container(
-          decoration: BoxDecoration(
-            gradient: AuroraGradient.createAuroraGradient(),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF4285F4), // Start color (original blue)
+                Color(0xFF2A65CC), // Slightly darker blue for gradient effect
+              ],
+            ),
           ),
           child: AppBar(
-            title: const Text(
-              'SisuHyy',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
             backgroundColor: Colors.transparent,
             foregroundColor: Colors.white,
             elevation: 0,
@@ -41,34 +70,43 @@ class WordDetailPage extends StatelessWidget {
                 onPressed: () async {
                   try {
                     // Generate and save word flashcard
-                    final flashcardBox = await Hive.openBox<Flashcard>('flashcards');
-                    
+                    final flashcardBox = await Hive.openBox<Flashcard>(
+                      'flashcards',
+                    );
+
                     // Check if the same flashcard already exists
                     final existingFlashcards = flashcardBox.values.toList();
-                    final isAlreadyCreated = existingFlashcards.any((flashcard) => 
-                      flashcard.word == word.word && flashcard.pos == word.pos);
-                    
+                    final isAlreadyCreated = existingFlashcards.any(
+                      (flashcard) =>
+                          flashcard.word == widget.word.word &&
+                          flashcard.pos == widget.word.pos,
+                    );
+
                     if (isAlreadyCreated) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Sanakortti on jo luotu')),
+                          const SnackBar(
+                            content: Text('Sanakortti on jo luotu'),
+                          ),
                         );
                       }
                       return;
                     }
-                    
+
                     final flashcard = Flashcard(
-                      word: word.word,
-                      pos: word.pos,
-                      definition: word.definition,
-                      example: word.example,
+                      word: widget.word.word,
+                      pos: widget.word.pos,
+                      definition: widget.word.definition,
+                      example: widget.word.example,
                       createdDate: DateTime.now(),
                       nextReviewDate: DateTime.now(), // Added nextReviewDate
-                      imageUrl: word.imageUrl, // Include the image URL from the saved word
+                      imageUrl: widget
+                          .word
+                          .imageUrl, // Include the image URL from the saved word
                     );
-                    
+
                     await flashcardBox.add(flashcard);
-                    
+
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Sanakortti luotu')),
@@ -77,7 +115,9 @@ class WordDetailPage extends StatelessWidget {
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Virhe sanakortin luomisessa')),
+                        const SnackBar(
+                          content: Text('Virhe sanakortin luomisessa'),
+                        ),
                       );
                     }
                   }
@@ -88,7 +128,7 @@ class WordDetailPage extends StatelessWidget {
                 onPressed: () async {
                   // Delete current word
                   final box = await Hive.openBox<SavedWord>('wordbook');
-                  final index = box.values.toList().indexOf(word);
+                  final index = box.values.toList().indexOf(widget.word);
                   if (index != -1) {
                     await box.deleteAt(index);
                   }
@@ -110,8 +150,8 @@ class WordDetailPage extends StatelessWidget {
           if (snapshot.hasData) {
             final box = snapshot.data!;
             final words = box.values.toList();
-            final currentIndex = words.indexOf(word);
-            
+            final currentIndex = words.indexOf(widget.word);
+
             return PageView.builder(
               itemCount: words.length,
               controller: PageController(initialPage: currentIndex),
@@ -135,50 +175,47 @@ class WordDetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Word and part of speech
-              Container(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      word.word,
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
+              // Word and part of speech with audio button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    word.word,
+                    style: const TextStyle(
+                      fontSize: 24, // Consistent with dialog
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87, // Consistent with dialog
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      word.pos,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.volume_up, color: Colors.blue),
+                    onPressed: () => _speak(word.word),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                word.pos,
+                style: const TextStyle(
+                  fontSize: 16, // Consistent with dialog
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey, // Consistent with dialog
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Definition
               const Text(
                 'Määritelmä',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18, // Consistent with dialog
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
+                padding: const EdgeInsets.all(12.0), // Keep padding
                 child: Text(
                   word.definition,
                   style: const TextStyle(
@@ -189,23 +226,19 @@ class WordDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Example sentence
               const Text(
                 'Esimerkki',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18, // Consistent with dialog
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue[200]!),
-                ),
+                padding: const EdgeInsets.all(12.0), // Keep padding
                 child: DefaultTextStyle(
                   style: const TextStyle(
                     fontSize: 16,
@@ -233,7 +266,7 @@ class WordDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Display image if available
               if (word.imageUrl != null && word.imageUrl!.isNotEmpty)
                 Container(
@@ -251,7 +284,9 @@ class WordDetailPage extends StatelessWidget {
                           width: 200,
                           height: 200,
                           color: Colors.grey[300],
-                          child: const Center(child: CircularProgressIndicator()),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
                         );
                       },
                       errorBuilder: (context, error, stackTrace) {
@@ -272,10 +307,7 @@ class WordDetailPage extends StatelessWidget {
               // Save date
               Text(
                 'Lisätty: ${word.dateAdded.day}.${word.dateAdded.month}.${word.dateAdded.year}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
             ],
           ),
