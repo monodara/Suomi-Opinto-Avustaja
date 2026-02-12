@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/saved_word.dart';
 import 'package:frontend/models/flashcard.dart';
 import 'package:hive/hive.dart';
-import '../utils/aurora_gradient.dart';
 import '../widgets/clickable_words_text.dart';
 import 'package:flutter_tts/flutter_tts.dart'; // New import for TTS
 
