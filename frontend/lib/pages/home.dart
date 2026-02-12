@@ -7,6 +7,7 @@ import '../widgets/todays_achievements_card.dart'; // New import
 import '../widgets/todays_vocabulary_section.dart'; // New import
 import '../widgets/latest_news_article_card.dart'; // New import
 import '../widgets/saved_articles_section.dart'; // New import
+import 'package:frontend/pages/writing_practice_page.dart'; // New import for WritingPracticePage
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -86,6 +87,16 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 24),
               TodaysVocabularySection(todayVocabulary: _todayVocabulary),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WritingPracticePage()),
+                  );
+                },
+                child: const Text('Start Writing Practice'),
+              ),
               const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

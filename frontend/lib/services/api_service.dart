@@ -138,4 +138,27 @@ class ApiService {
       throw Exception('Error during LLM analysis: $e');
     }
   }
+
+  Future<Map<String, dynamic>> writingPracticeAnalysis(String userParagraph, List<String> vocabularyWords) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl/writing-practice'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'user_paragraph': userParagraph,
+          'vocabulary_words': vocabularyWords,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception(
+          'Failed to perform writing practice analysis: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Error during writing practice analysis: $e');
+    }
+  }
 }
