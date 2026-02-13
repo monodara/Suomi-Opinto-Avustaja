@@ -19,6 +19,8 @@ dependencies:
   url_launcher: ^6.3.1
   provider: ^6.1.2
   flutter_tts: ^4.0.2 # Added flutter_tts dependency
+  flutter_sound: ^9.2.13 # New import for audio recording
+  permission_handler: ^11.3.1 # New import for permissions
 
 dev_dependencies:
   flutter_test:

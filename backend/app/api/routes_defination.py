@@ -18,7 +18,9 @@ async def define_word(
     # use TNPP model to analyze word form and lemma
     tnpp_result = tnpp_service.analyze_finnish_word(word)
     lemma_str = tnpp_result["lemma"]  # it can be like 'alennus#myynti'
-    raw_feats_dict = tnpp_result.get("features", {}) # Get raw feats dictionary
+    raw_feats_dict = tnpp_result.get("features")
+    if raw_feats_dict is None:
+        raw_feats_dict = {}
     raw_feats_string = raw_feats_dict.get("feats", "") # Extract the feats string
     parsed_feats = parse_feats(raw_feats_string) # Parse feats
 

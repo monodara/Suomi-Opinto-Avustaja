@@ -25,6 +25,10 @@ uvicorn==0.35.0
 stanza==1.9.2
 playwright==1.40.0
 spacy
-deepl
+google-cloud-translate
 google-genai
-dotenv
+SpeechRecognition
+python-Levenshtein
+python-multipart
+torch==2.2.2
+numpy==1.26.4

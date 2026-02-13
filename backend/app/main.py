@@ -2,8 +2,9 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import routes_defination, routes_news, routes_papunet, routes_sentence_analysis, routes_translation, routes_llm_analysis, routes_writing_practice # New import
+from app.api import routes_defination, routes_news, routes_papunet, routes_sentence_analysis, routes_translation, routes_llm_analysis, routes_writing_practice, routes_asr, routes_comparison # New import
 import logging
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -17,7 +18,9 @@ app.include_router(routes_papunet.router)
 app.include_router(routes_sentence_analysis.router)
 app.include_router(routes_translation.router)
 app.include_router(routes_llm_analysis.router)
-app.include_router(routes_writing_practice.router) # Include the new router
+app.include_router(routes_writing_practice.router)
+app.include_router(routes_asr.router)
+app.include_router(routes_comparison.router) # Include the new router
 
 @app.get("/")
 async def root():

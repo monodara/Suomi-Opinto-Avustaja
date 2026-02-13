@@ -161,4 +161,50 @@ class ApiService {
       throw Exception('Error during writing practice analysis: $e');
     }
   }
+
+  Future<Map<String, dynamic>> transcribeAudio(List<int> audioBytes) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$apiBaseUrl/asr'),
+      );
+      request.files.add(http.MultipartFile.fromBytes(
+        'audio_file',
+        audioBytes,
+        filename: 'audio.wav', // Assuming WAV format
+      ));
+
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to transcribe audio: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error during audio transcription: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> compareSentences(String sentence1, String sentence2) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$apiBaseUrl/compare-sentences'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'sentence1': sentence1,
+          'sentence2': sentence2,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to compare sentences: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error comparing sentences: $e');
+    }
+  }
 }

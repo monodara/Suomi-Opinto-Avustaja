@@ -3,6 +3,7 @@ import 'package:frontend/models/news_item.dart';
 import 'package:frontend/utils/navigation_controller.dart';
 import 'package:frontend/repositories/article_repository.dart';
 import '../widgets/article_content_display.dart'; // New import
+import 'package:frontend/pages/shadowing_practice_page.dart'; // New import
 
 class NewsDetailPage extends StatelessWidget {
   final NewsItem article;
@@ -25,6 +26,19 @@ class NewsDetailPage extends StatelessWidget {
           },
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.mic, color: Colors.white), // Shadowing button
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ShadowingPracticePage(
+                    articleContent: article.content,
+                  ),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.save, color: Colors.white),
             onPressed: () async {
