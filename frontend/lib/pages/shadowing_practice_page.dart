@@ -5,7 +5,9 @@ import 'package:frontend/audio_handler.dart'; // New import for conditional audi
 import 'package:frontend/audio_handler_interface.dart'; // New import for the interface
 import 'dart:io'; // For File operations
 import 'package:path_provider/path_provider.dart'; // For temporary file path
-import 'dart:async'; // For Timer
+import 'dart:async';
+
+import 'package:permission_handler/permission_handler.dart'; // For Timer
 
 class ShadowingPracticePage extends StatefulWidget {
   final List<Map<String, dynamic>> articleContent;
@@ -16,7 +18,8 @@ class ShadowingPracticePage extends StatefulWidget {
   State<ShadowingPracticePage> createState() => _ShadowingPracticePageState();
 }
 
-class _ShadowingPracticePageState extends State<ShadowingPracticePage> {
+class _ShadowingPracticePageState extends State<ShadowingPracticePage>
+    with WidgetsBindingObserver {
   List<String> _sentences = [];
   int _currentSentenceIndex = 0;
   bool _isLoadingSentences = true;
@@ -34,6 +37,7 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadSentences();
     flutterTts = FlutterTts();
     _initTts();
@@ -75,6 +79,27 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage> {
     }
   }
 
+  // 2. 监听从设置页面回来的动作
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // 当 App 回到前台，如果之前报错了，尝试自动检查权限并清除报错
+      _checkPermissionSilently();
+    }
+  }
+
+  Future<void> _checkPermissionSilently() async {
+    // 简单检查一下，如果权限通了，就把报错文字去掉
+    var status = await Permission.microphone.status;
+    if (status.isGranted &&
+        _errorMessage != null &&
+        _errorMessage!.contains('permission')) {
+      setState(() {
+        _errorMessage = null;
+      });
+    }
+  }
+
   Future<void> _startRecording() async {
     if (!_audioHandler.isSupported()) {
       setState(() {
@@ -99,7 +124,7 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage> {
         // The audio_handler_mobile.dart already calls openAppSettings() if permanentlyDenied
         setState(() {
           _errorMessage =
-              'Microphone permission not granted. Please enable it in your device settings.';
+              'Please grant microphone permission in your device settings and continue.';
         });
       }
     } catch (e) {
@@ -191,6 +216,7 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage> {
   void dispose() {
     flutterTts.stop();
     _audioHandler.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

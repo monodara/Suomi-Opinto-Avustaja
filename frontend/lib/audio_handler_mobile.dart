@@ -17,15 +17,20 @@ class AudioHandlerMobile implements AudioHandlerInterface {
 
   @override
   Future<bool> hasPermission() async {
-    PermissionStatus status = await Permission.microphone.status;
+    var status = await Permission.microphone.status;
+
+    // Request permission if it's denied or limited (iOS)
+    if (status.isDenied || status.isLimited) {
+      status = await Permission.microphone.request();
+    }
+
+    // Prompt the user to open app settings if permission is permanently denied
     if (status.isPermanentlyDenied) {
-      // If permission is permanently denied, direct user to app settings
+      print('Permission permanently denied, please enable it in settings');
       await openAppSettings();
       return false;
     }
-    // Request permission if not already granted or denied
-    status = await Permission.microphone.request();
-    print('Microphone permission status: $status'); // Debug print
+
     return status.isGranted;
   }
 
@@ -34,10 +39,7 @@ class AudioHandlerMobile implements AudioHandlerInterface {
     if (_recorder == null || !_isInitialized) {
       await init();
     }
-    await _recorder!.startRecorder(
-      toFile: filePath,
-      codec: Codec.pcm16WAV,
-    );
+    await _recorder!.startRecorder(toFile: filePath, codec: Codec.pcm16WAV);
   }
 
   @override
