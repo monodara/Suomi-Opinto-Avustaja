@@ -41,14 +41,10 @@ class TodaysAchievementsCard extends StatelessWidget {
             children: [
               const Row(
                 children: [
-                  Icon(
-                    Icons.star_border,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  Icon(Icons.star_border, color: Colors.white, size: 24),
                   SizedBox(width: 8),
                   Text(
-                    'Great progress!',
+                    'Hienoa Edistystä!',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -63,17 +59,13 @@ class TodaysAchievementsCard extends StatelessWidget {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                child: const Icon(Icons.person, color: Colors.white, size: 24),
               ),
             ],
           ),
           const SizedBox(height: 16),
           const Text(
-            'Today\'s achievements',
+            'Päivän Saavutus',
             style: TextStyle(
               color: Colors.white,
               fontSize: 28,
@@ -95,7 +87,7 @@ class TodaysAchievementsCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Words learned',
+                    'Sanaa opittu',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
                       fontSize: 16,
@@ -116,7 +108,7 @@ class TodaysAchievementsCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Sentences read',
+                    'Lausetta luettu',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
                       fontSize: 16,

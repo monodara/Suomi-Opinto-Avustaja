@@ -92,10 +92,12 @@ class _HomePageState extends State<HomePage> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const WritingPracticePage()),
+                    MaterialPageRoute(
+                      builder: (context) => const WritingPracticePage(),
+                    ),
                   );
                 },
-                child: const Text('Start Writing Practice'),
+                child: const Text('Aloita kirjoitusharjoittelu'),
               ),
               const SizedBox(height: 32),
               Row(

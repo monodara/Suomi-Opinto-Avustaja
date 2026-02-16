@@ -6,10 +6,7 @@ import 'package:frontend/pages/word_detail.dart'; // New import
 class TodaysVocabularySection extends StatelessWidget {
   final List<SavedWord> todayVocabulary;
 
-  const TodaysVocabularySection({
-    super.key,
-    required this.todayVocabulary,
-  });
+  const TodaysVocabularySection({super.key, required this.todayVocabulary});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +17,7 @@ class TodaysVocabularySection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Today\'s Vocabulary',
+              'Päivän Sanasto',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
@@ -41,13 +38,14 @@ class TodaysVocabularySection extends StatelessWidget {
         if (todayVocabulary.isEmpty)
           const Center(
             child: Text(
-              'No vocabulary for today. Add some words to your wordbook!',
+              'Ei sanastoa tänään. Lue artikkeli ja lisää sanoja sanakirjaasi!',
             ),
           )
         else
           ...todayVocabulary
               .map(
-                (word) => GestureDetector( // Wrap Card with GestureDetector
+                (word) => GestureDetector(
+                  // Wrap Card with GestureDetector
                   onTap: () {
                     Navigator.push(
                       context,

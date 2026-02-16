@@ -141,7 +141,7 @@ class _MainAppState extends State<MainApp> {
                           ),
                         ),
                         Text(
-                          'Finnish Language Learning',
+                          'Paranna suomen kieltä päivä päivältä',
                           style: TextStyle(
                             color: Colors.grey, // Grey from screenshot
                             fontSize: 14,

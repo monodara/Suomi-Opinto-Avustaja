@@ -58,12 +58,14 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
     });
 
     try {
-      final vocabularyWords = _todayVocabulary.map((word) => word.word).toList();
+      final vocabularyWords = _todayVocabulary
+          .map((word) => word.word)
+          .toList();
       final result = await ApiService.instance.writingPracticeAnalysis(
         _paragraphController.text,
         vocabularyWords,
       );
-      
+
       final String rawAnalysis = result['analysis_result'];
       final decoded = jsonDecode(rawAnalysis);
 
@@ -76,7 +78,8 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
         });
       } else {
         setState(() {
-          _errorMessage = 'AI analysis returned unexpected format: $rawAnalysis';
+          _errorMessage =
+              'AI analysis returned unexpected format: $rawAnalysis';
         });
       }
     } catch (e) {
@@ -114,10 +117,10 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
           ),
           child: AppBar(
             title: const Text(
-              'Writing Practice',
+              'Kirjoitusharjoitus',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -137,18 +140,20 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Today\'s Vocabulary:',
+              'Päivän Sanasto:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8.0,
               runSpacing: 4.0,
-              children: _todayVocabulary.map((word) => Chip(label: Text(word.word))).toList(),
+              children: _todayVocabulary
+                  .map((word) => Chip(label: Text(word.word)))
+                  .toList(),
             ),
             const SizedBox(height: 24),
             const Text(
-              'Write your paragraph:',
+              'Kirjoita kappaleesi',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
@@ -157,7 +162,8 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
               maxLines: 5,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: 'Write your Finnish paragraph here...',
+                hintText:
+                    'Käytä tämän päivän sanastoa ja kirjoita jotain, mitä haluat sanoa...',
               ),
             ),
             const SizedBox(height: 16),
@@ -165,7 +171,7 @@ class _WritingPracticePageState extends State<WritingPracticePage> {
                 ? const Center(child: CircularProgressIndicator())
                 : ElevatedButton(
                     onPressed: _submitForAnalysis,
-                    child: const Text('Submit for Analysis'),
+                    child: const Text('Lähetä analysoitavaksi'),
                   ),
             if (_errorMessage != null)
               Padding(
