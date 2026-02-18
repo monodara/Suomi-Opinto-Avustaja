@@ -1,4 +1,4 @@
-import 'package:frontend/audio_handler_interface.dart';
+import 'package:frontend/audio/audio_handler_interface.dart';
 
 class AudioHandlerWeb implements AudioHandlerInterface {
   @override

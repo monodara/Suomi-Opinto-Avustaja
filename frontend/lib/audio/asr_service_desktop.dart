@@ -1,4 +1,4 @@
-import 'package:frontend/asr_service_interface.dart';
+import 'package:frontend/audio/asr_service_interface.dart';
 import 'package:frontend/services/api_service.dart';
 import 'dart:typed_data';
 

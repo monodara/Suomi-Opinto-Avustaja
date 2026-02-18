@@ -1,4 +1,4 @@
-import 'package:frontend/asr_service_interface.dart';
+import 'package:frontend/audio/asr_service_interface.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:permission_handler/permission_handler.dart';

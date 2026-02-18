@@ -1,4 +1,4 @@
-import 'package:frontend/asr_service_interface.dart';
+import 'package:frontend/audio/asr_service_interface.dart';
 
 class ASRServiceWeb implements ASRServiceInterface {
   @override

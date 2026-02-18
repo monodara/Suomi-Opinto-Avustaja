@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:frontend/audio_handler.dart'; // New import for conditional audio handler
-import 'package:frontend/audio_handler_interface.dart'; // New import for the interface
+import 'package:frontend/audio/audio_handler_interface.dart'; // New import for the interface
+
+import 'package:frontend/audio/audio_handler_desktop.dart' // Default for desktop (macOS, Windows, Linux)
+    if (dart.library.io) 'package:frontend/audio/audio_handler_mobile.dart' // For mobile (iOS, Android)
+    if (dart.library.html) 'package:frontend/audio/audio_handler_web.dart'; // For web
 import 'dart:io'; // For File operations
 import 'package:path_provider/path_provider.dart'; // For temporary file path
 import 'dart:async';
@@ -41,8 +44,7 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
     _loadSentences();
     flutterTts = FlutterTts();
     _initTts();
-    _audioHandler =
-        getAudioHandler(); // Get the platform-specific implementation
+        _audioHandler = getAudioHandler(); // Use the interface
     _audioHandler.init();
   }
 
