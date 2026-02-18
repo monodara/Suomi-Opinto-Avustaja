@@ -225,7 +225,27 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Shadowing Practice')),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF4285F4), // Start color (original blue)
+                Color(0xFF2A65CC), // Slightly darker blue for gradient effect
+              ],
+            ),
+          ),
+          child: AppBar(
+            title: const Text('Varjostusharjoitus'),
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+          ),
+        ),
+      ),
       body: _isLoadingSentences
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
@@ -236,7 +256,7 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Sentence ${_currentSentenceIndex + 1} / ${_sentences.length}',
+                    'Lause ${_currentSentenceIndex + 1} / ${_sentences.length}',
                     style: const TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 20),
@@ -252,38 +272,71 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.volume_up,
-                          size: 40,
-                          color: Colors.blue,
-                        ),
-                        onPressed: _speakCurrentSentence,
+                      Column(
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.volume_up,
+                              size: 40,
+                              color: Colors.blue,
+                            ),
+                            onPressed: _speakCurrentSentence,
+                          ),
+                          const Text(
+                            'Kuuntele',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(width: 20),
                       if (!_audioHandler.isSupported())
                         const Text(
-                          'Recording not supported on this platform',
+                          'Tallennus ei ole tuettu tällä alustalla',
                           style: TextStyle(color: Colors.red),
                         )
                       else
-                        _isRecording
-                            ? IconButton(
-                                icon: const Icon(
-                                  Icons.stop,
-                                  size: 40,
-                                  color: Colors.red,
-                                ),
-                                onPressed: _stopRecording,
-                              )
-                            : IconButton(
-                                icon: const Icon(
-                                  Icons.mic,
-                                  size: 40,
-                                  color: Colors.green,
-                                ),
-                                onPressed: _startRecording,
+                        Column(
+                          children: [
+                            _isRecording
+                                ? TweenAnimationBuilder<double>(
+                                    tween: Tween<double>(begin: 1.0, end: 0.5),
+                                    duration: const Duration(milliseconds: 700),
+                                    builder: (context, opacity, child) {
+                                      return AnimatedOpacity(
+                                        opacity: opacity,
+                                        duration:
+                                            const Duration(milliseconds: 700),
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.mic,
+                                            size: 40,
+                                            color: Colors.red,
+                                          ),
+                                          onPressed: _stopRecording,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                : IconButton(
+                                    icon: const Icon(
+                                      Icons.mic,
+                                      size: 40,
+                                      color: Colors.green,
+                                    ),
+                                    onPressed: _startRecording,
+                                  ),
+                            Text(
+                              _isRecording ? 'Tallennetaan...' : 'Aloita tallennus',
+                              style: TextStyle(
+                                color: _isRecording ? Colors.red : Colors.green,
+                                fontSize: 12,
                               ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -291,14 +344,14 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
                     const CircularProgressIndicator()
                   else if (_transcribedText != null) ...[
                     const Text(
-                      'Your recording:',
+                      'Tallenteesi:',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(_transcribedText!),
                     const SizedBox(height: 10),
                     if (_similarityScore != null)
                       Text(
-                        'Similarity Score: ${(_similarityScore! * 100).toStringAsFixed(2)}%',
+                        'Samankaltaisuusaste: ${(_similarityScore! * 100).toStringAsFixed(2)}%',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -316,13 +369,13 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
                         onPressed: _currentSentenceIndex > 0
                             ? _previousSentence
                             : null,
-                        child: const Text('Previous'),
+                        child: const Text('Edellinen'),
                       ),
                       ElevatedButton(
                         onPressed: _currentSentenceIndex < _sentences.length - 1
                             ? _nextSentence
                             : null,
-                        child: const Text('Next'),
+                        child: const Text('Seuraava'),
                       ),
                     ],
                   ),
