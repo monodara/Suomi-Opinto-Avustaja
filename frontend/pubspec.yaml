@@ -22,6 +22,7 @@ dependencies:
   flutter_sound: ^9.2.13 # New import for audio recording
   permission_handler: ^11.3.1 # New import for permissions
   speech_to_text: ^6.6.1 # New import for local ASR on mobile
+  collection: ^1.18.0 # New import for firstWhereOrNull
 
 dev_dependencies:
   flutter_test:

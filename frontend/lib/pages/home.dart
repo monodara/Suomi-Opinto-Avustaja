@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/services/api_service.dart';
 import '../models/news_item.dart';
 import '../repositories/word_repository.dart'; // Import WordRepository
+import '../repositories/user_activity_repository.dart'; // New import
 import '../models/saved_word.dart'; // Import SavedWord
 import '../widgets/todays_achievements_card.dart'; // New import
 import '../widgets/todays_vocabulary_section.dart'; // New import
@@ -20,12 +21,15 @@ class _HomePageState extends State<HomePage> {
   Future<NewsItem?>? _newsFuture;
   String? _error;
   List<SavedWord> _todayVocabulary = [];
+  int _wordsLearnedToday = 0;
+  int _sentencesReadToday = 0; // New state variable
 
   @override
   void initState() {
     super.initState();
     _newsFuture = ApiService.instance.fetchNews();
     _loadTodayVocabulary();
+    _loadAchievements();
   }
 
   void _retry() {
@@ -36,10 +40,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadTodayVocabulary() async {
-    final words = await WordRepository.instance.getRandomWords(5);
+    final words = await WordRepository.instance.getWordsDueForReview(5);
     setState(() {
       _todayVocabulary = words;
     });
+  }
+
+  Future<void> _loadAchievements() async {
+    final wordsLearned = await WordRepository.instance.getWordsLearnedToday();
+    final sentencesRead = await UserActivityRepository.instance.getSentencesReadToday();
+    setState(() {
+      _wordsLearnedToday = wordsLearned;
+      _sentencesReadToday = sentencesRead;
+    });
+  }
+
+  void _onWordStatusChanged() {
+    _loadAchievements();
+    _loadTodayVocabulary();
   }
 
   @override
@@ -82,11 +100,14 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(16),
             children: [
               TodaysAchievementsCard(
-                wordsLearned: 12, // Placeholder value
-                sentencesRead: 3, // Placeholder value
+                wordsLearned: _wordsLearnedToday,
+                sentencesRead: _sentencesReadToday,
               ),
               const SizedBox(height: 24),
-              TodaysVocabularySection(todayVocabulary: _todayVocabulary),
+              TodaysVocabularySection(
+                todayVocabulary: _todayVocabulary,
+                onWordStatusChanged: _onWordStatusChanged, // Pass callback
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
@@ -110,7 +131,10 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
               const SizedBox(height: 16),
-              LatestNewsArticleCard(article: article),
+              LatestNewsArticleCard(
+                article: article,
+                onSentencePracticed: _onWordStatusChanged, // Pass callback
+              ),
               const SizedBox(height: 32),
               const SavedArticlesSection(), // Re-add the SavedArticlesSection
             ],

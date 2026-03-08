@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:frontend/services/api_service.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:frontend/audio/audio_handler_interface.dart'; // New import for the interface
+import 'package:frontend/repositories/user_activity_repository.dart'; // New import
+import 'package:frontend/audio/asr_service.dart'; // New import for getASRService
+import 'package:frontend/audio/asr_service_interface.dart'; // New import for ASRServiceInterface
 
 import 'package:frontend/audio/audio_handler_desktop.dart' // Default for desktop (macOS, Windows, Linux)
     if (dart.library.io) 'package:frontend/audio/audio_handler_mobile.dart' // For mobile (iOS, Android)
@@ -14,8 +17,13 @@ import 'package:permission_handler/permission_handler.dart'; // For Timer
 
 class ShadowingPracticePage extends StatefulWidget {
   final List<Map<String, dynamic>> articleContent;
+  final VoidCallback? onSentencePracticed; // New parameter
 
-  const ShadowingPracticePage({super.key, required this.articleContent});
+  const ShadowingPracticePage({
+    super.key,
+    required this.articleContent,
+    this.onSentencePracticed, // Initialize new parameter
+  });
 
   @override
   State<ShadowingPracticePage> createState() => _ShadowingPracticePageState();
@@ -30,6 +38,7 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
 
   late FlutterTts flutterTts;
   late AudioHandlerInterface _audioHandler; // Use the interface
+  late ASRServiceInterface _asrService; // Declare ASRService
   bool _isRecording = false;
   String? _recordedFilePath;
 
@@ -44,8 +53,10 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
     _loadSentences();
     flutterTts = FlutterTts();
     _initTts();
-        _audioHandler = getAudioHandler(); // Use the interface
+    _audioHandler = getAudioHandler(); // Use the interface
     _audioHandler.init();
+    _asrService = getASRService(); // Initialize ASRService
+    _asrService.init();
   }
 
   Future<void> _loadSentences() async {
@@ -112,26 +123,38 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
 
     try {
       if (await _audioHandler.hasPermission()) {
-        final directory = await getTemporaryDirectory();
-        _recordedFilePath = '${directory.path}/shadowing_audio.wav';
-        await _audioHandler.startRecording(_recordedFilePath!);
-        setState(() {
-          _isRecording = true;
-          _transcribedText = null;
-          _similarityScore = null;
-          _errorMessage = null;
-        });
+        // For mobile, we start ASR listening directly
+        // For desktop, we still record audio and send to backend
+        if (Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
+          // Use local ASR for mobile
+          await _asrService.startListening("fi-FI"); // Start listening
+          setState(() {
+            _isRecording = true;
+            _transcribedText = null;
+            _similarityScore = null;
+            _errorMessage = null;
+          });
+        } else {
+          // Fallback to recording audio and sending to backend for desktop/web
+          final directory = await getTemporaryDirectory();
+          _recordedFilePath = '${directory.path}/shadowing_audio.wav';
+          await _audioHandler.startRecording(_recordedFilePath!);
+          setState(() {
+            _isRecording = true;
+            _transcribedText = null;
+            _similarityScore = null;
+            _errorMessage = null;
+          });
+        }
       } else {
-        // If permission is not granted, check if it's permanently denied
-        // The audio_handler_mobile.dart already calls openAppSettings() if permanentlyDenied
         setState(() {
           _errorMessage =
-              'Please grant microphone permission in your device settings and continue.';
+              'Myönnä mikrofonilupa laitteen asetuksista ja jatka.';
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to start recording: $e';
+        _errorMessage = 'Tallennuksen aloitus epäonnistui: $e';
       });
     }
   }
@@ -140,50 +163,92 @@ class _ShadowingPracticePageState extends State<ShadowingPracticePage>
     if (!_audioHandler.isSupported()) return;
 
     try {
-      final path = await _audioHandler.stopRecording();
-      if (path != null) {
-        _recordedFilePath = path;
+      if (Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
+        // Stop local ASR for mobile
+        await _asrService.stopListening();
+        _transcribedText = _asrService.lastRecognizedWords; // Get transcribed text
         setState(() {
           _isRecording = false;
         });
-        _analyzeRecording();
+        _analyzeRecording(); // Analyze with local ASR result
+      } else {
+        // Stop recording for desktop/web
+        final path = await _audioHandler.stopRecording();
+        if (path != null) {
+          _recordedFilePath = path;
+          setState(() {
+            _isRecording = false;
+          });
+          _analyzeRecording(); // Analyze with recorded audio
+        }
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to stop recording: $e';
+        _errorMessage = 'Tallennuksen lopetus epäonnistui: $e';
       });
     }
   }
 
   Future<void> _analyzeRecording() async {
-    if (_recordedFilePath == null) return;
-
     setState(() {
       _isAnalyzing = true;
       _errorMessage = null;
     });
 
     try {
-      final audioFile = File(_recordedFilePath!);
-      final audioBytes = await audioFile.readAsBytes();
+      if (Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.android) {
+        // For mobile, _transcribedText is already set by ASRServiceMobile
+        if (_transcribedText != null && _transcribedText!.isNotEmpty) {
+          final comparisonResponse = await ApiService.instance.compareSentences(
+            _sentences[_currentSentenceIndex],
+            _transcribedText!,
+          );
+          _similarityScore = comparisonResponse['similarity_score'];
 
-      // ASR
-      final asrResponse = await ApiService.instance.transcribeAudio(audioBytes);
-      _transcribedText = asrResponse['transcribed_text'];
-
-      // Compare sentences
-      if (_transcribedText != null && _transcribedText!.isNotEmpty) {
-        final comparisonResponse = await ApiService.instance.compareSentences(
-          _sentences[_currentSentenceIndex],
-          _transcribedText!,
-        );
-        _similarityScore = comparisonResponse['similarity_score'];
+          if (_similarityScore != null && _similarityScore! >= 0.7) {
+            await UserActivityRepository.instance.recordPracticedSentence(
+              _sentences[_currentSentenceIndex],
+              _similarityScore!,
+            );
+            if (widget.onSentencePracticed != null) {
+              widget.onSentencePracticed!();
+            }
+          }
+        } else {
+          _similarityScore = 0.0; // No transcription, no similarity
+        }
       } else {
-        _similarityScore = 0.0; // No transcription, no similarity
+        // For desktop/web, send recorded audio to backend for ASR
+        if (_recordedFilePath == null) return;
+        final audioFile = File(_recordedFilePath!);
+        final audioBytes = await audioFile.readAsBytes();
+
+        final asrResponse = await ApiService.instance.transcribeAudio(audioBytes);
+        _transcribedText = asrResponse['transcribed_text'];
+
+        if (_transcribedText != null && _transcribedText!.isNotEmpty) {
+          final comparisonResponse = await ApiService.instance.compareSentences(
+            _sentences[_currentSentenceIndex],
+            _transcribedText!,
+          );
+          _similarityScore = comparisonResponse['similarity_score'];
+
+          if (_similarityScore != null && _similarityScore! >= 0.7) {
+            await UserActivityRepository.instance.recordPracticedSentence(
+              _sentences[_currentSentenceIndex],
+              _similarityScore!,
+            );
+            if (widget.onSentencePracticed != null) {
+              widget.onSentencePracticed!();
+            }
+          }
+        } else {
+          _similarityScore = 0.0; // No transcription, no similarity
+        }
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Analysis failed: $e';
+        _errorMessage = 'Analyysi epäonnistui: $e';
       });
     } finally {
       setState(() {

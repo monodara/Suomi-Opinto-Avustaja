@@ -12,6 +12,7 @@ import 'pages/wordbook.dart';
 import 'pages/flashcard_list.dart';
 import 'models/news_item.dart';
 import 'package:frontend/services/api_service.dart';
+import 'package:frontend/repositories/user_activity_repository.dart'; // New import
 import 'utils/navigation_controller.dart';
 
 void main() async {
@@ -22,9 +23,7 @@ void main() async {
 
   // Clean up old Hive data to avoid type conflicts
   try {
-    await Hive.deleteBoxFromDisk('wordbook');
-    await Hive.deleteBoxFromDisk('saved_articles');
-    await Hive.deleteBoxFromDisk('flashcards'); // Added this line
+    await Hive.deleteFromDisk(); // Delete all Hive data
   } catch (e) {
     // Ignore deletion errors
   }
@@ -32,10 +31,14 @@ void main() async {
   Hive.registerAdapter(SavedWordAdapter());
   Hive.registerAdapter(SavedArticleAdapter());
   Hive.registerAdapter(FlashcardAdapter());
+  Hive.registerAdapter(ViewedArticleAdapter()); // Register ViewedArticleAdapter
+  Hive.registerAdapter(PracticedSentenceAdapter()); // Register PracticedSentenceAdapter
   await Hive.openBox('word_cache');
-  await Hive.openBox<SavedWord>('wordbook');
+  await Hive.openBox<SavedWord>('wordbook'); // Open after deletion
   await Hive.openBox<SavedArticle>('saved_articles');
   await Hive.openBox<Flashcard>('flashcards');
+  await Hive.openBox<ViewedArticle>('viewed_articles'); // Open viewed_articles box
+  await Hive.openBox<PracticedSentence>('practiced_sentences'); // Open practiced_sentences box
   await ApiService.instance.init(); // Initialize ApiService and its Hive boxes
 
   runApp(const MyApp());
@@ -78,14 +81,20 @@ class _MainAppState extends State<MainApp> {
     super.initState();
     // 设置导航控制器的回调
     NavigationController().onReturnToHome = _clearSelectedArticle;
-    NavigationController().onShowArticleDetails = _setSelectedArticle;
+    NavigationController().onShowArticleDetails = (article, {onSentencePracticed}) {
+      _setSelectedArticle(article, onSentencePracticed: onSentencePracticed);
+    };
   }
 
   // Private methods for navigation controller
-  void _setSelectedArticle(NewsItem article) {
+  void _setSelectedArticle(NewsItem article, {VoidCallback? onSentencePracticed}) {
     setState(() {
       _selectedArticle = article;
     });
+    // If a callback is provided, call it after setting the article
+    if (onSentencePracticed != null) {
+      onSentencePracticed();
+    }
   }
 
   void _clearSelectedArticle() {
@@ -156,7 +165,19 @@ class _MainAppState extends State<MainApp> {
           : null, // Hide AppBar when _selectedArticle is not null
       body: _selectedArticle == null
           ? pages[_currentIndex]
-          : NewsDetailPage(article: _selectedArticle!),
+          : NewsDetailPage(
+              article: _selectedArticle!,
+              onSentencePracticed: () {
+                // This callback is triggered when a sentence is practiced in ShadowingPracticePage
+                // and needs to refresh achievements on HomePage.
+                // Since HomePage is a child of MainApp, we need to find a way to trigger its _loadAchievements.
+                // For now, we'll just call _loadAchievements directly if HomePage is mounted.
+                // A more robust solution might involve a Provider or BLoC pattern.
+                // For simplicity, let's assume HomePage is always mounted when this is called.
+                // This will be handled by the _onWordStatusChanged callback passed from HomePage to LatestNewsArticleCard.
+                // So, we don't need to do anything here directly.
+              },
+            ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

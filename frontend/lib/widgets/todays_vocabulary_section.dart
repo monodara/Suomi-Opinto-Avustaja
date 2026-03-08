@@ -5,8 +5,13 @@ import 'package:frontend/pages/word_detail.dart'; // New import
 
 class TodaysVocabularySection extends StatelessWidget {
   final List<SavedWord> todayVocabulary;
+  final VoidCallback? onWordStatusChanged; // New parameter
 
-  const TodaysVocabularySection({super.key, required this.todayVocabulary});
+  const TodaysVocabularySection({
+    super.key,
+    required this.todayVocabulary,
+    this.onWordStatusChanged, // Initialize new parameter
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,9 +55,17 @@ class TodaysVocabularySection extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => WordDetailPage(word: word),
+                        builder: (context) => WordDetailPage(
+                          word: word,
+                          onWordStatusChanged: onWordStatusChanged, // Pass callback
+                        ),
                       ),
-                    );
+                    ).then((_) {
+                      // When returning from WordDetailPage, trigger the callback
+                      if (onWordStatusChanged != null) {
+                        onWordStatusChanged!();
+                      }
+                    });
                   },
                   child: Card(
                     margin: const EdgeInsets.only(bottom: 12),

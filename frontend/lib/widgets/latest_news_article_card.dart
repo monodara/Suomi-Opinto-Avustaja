@@ -4,10 +4,12 @@ import 'package:frontend/utils/navigation_controller.dart';
 
 class LatestNewsArticleCard extends StatelessWidget {
   final NewsItem article;
+  final VoidCallback? onSentencePracticed; // New parameter
 
   const LatestNewsArticleCard({
     super.key,
     required this.article,
+    this.onSentencePracticed, // Initialize new parameter
   });
 
   @override
@@ -29,7 +31,10 @@ class LatestNewsArticleCard extends StatelessWidget {
         child: GestureDetector(
           onTap: () {
             // Show news details via navigation controller
-            NavigationController().showArticleDetails(article);
+            NavigationController().showArticleDetails(
+              article,
+              onSentencePracticed: onSentencePracticed, // Pass callback
+            );
           },
           child: Card(
             elevation: 0,

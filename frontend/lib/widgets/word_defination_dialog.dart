@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/repositories/word_repository.dart';
 import 'package:flutter_tts/flutter_tts.dart'; // New import
+import 'package:frontend/models/saved_word.dart'; // New import
+import 'package:collection/collection.dart'; // New import for firstWhereOrNull
 
 class WordDefinitionDialog extends StatefulWidget {
   final String displayWord;
@@ -253,7 +255,7 @@ class _WordDefinitionDialogState extends State<WordDefinitionDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text(
             'Sulje',
-            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold), // Standard accent color
+            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
           ),
         ),
       ],

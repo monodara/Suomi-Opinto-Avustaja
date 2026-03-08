@@ -7,8 +7,13 @@ import 'package:flutter_tts/flutter_tts.dart'; // New import for TTS
 
 class WordDetailPage extends StatefulWidget {
   final SavedWord word;
+  final VoidCallback? onWordStatusChanged; // New parameter
 
-  const WordDetailPage({super.key, required this.word});
+  const WordDetailPage({
+    super.key,
+    required this.word,
+    this.onWordStatusChanged, // Initialize new parameter
+  });
 
   @override
   State<WordDetailPage> createState() => _WordDetailPageState();
@@ -61,7 +66,12 @@ class _WordDetailPageState extends State<WordDetailPage> {
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                if (widget.onWordStatusChanged != null) {
+                  widget.onWordStatusChanged!();
+                }
+                Navigator.pop(context);
+              },
             ),
             actions: [
               IconButton(
@@ -97,11 +107,13 @@ class _WordDetailPageState extends State<WordDetailPage> {
                       pos: widget.word.pos,
                       definition: widget.word.definition,
                       example: widget.word.example,
-                      createdDate: DateTime.now(),
-                      nextReviewDate: DateTime.now(), // Added nextReviewDate
-                      imageUrl: widget
-                          .word
-                          .imageUrl, // Include the image URL from the saved word
+                      createdDate: widget.word.dateAdded, // Use SavedWord's dateAdded
+                      nextReviewDate: widget.word.nextReviewDate, // Use SavedWord's nextReviewDate
+                      interval: widget.word.interval, // Use SavedWord's interval
+                      repetitions: widget.word.repetitions, // Use SavedWord's repetitions
+                      easeFactor: widget.word.easeFactor, // Use SavedWord's easeFactor
+                      isLearned: widget.word.isLearned, // Use SavedWord's isLearned
+                      imageUrl: widget.word.imageUrl,
                     );
 
                     await flashcardBox.add(flashcard);
@@ -110,6 +122,9 @@ class _WordDetailPageState extends State<WordDetailPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Sanakortti luotu')),
                       );
+                    }
+                    if (widget.onWordStatusChanged != null) {
+                      widget.onWordStatusChanged!();
                     }
                   } catch (e) {
                     if (context.mounted) {
@@ -135,6 +150,9 @@ class _WordDetailPageState extends State<WordDetailPage> {
                   // Send notification to update wordbook list
                   // Use Navigator.pop to return and refresh wordbook page
                   if (context.mounted) {
+                    if (widget.onWordStatusChanged != null) {
+                      widget.onWordStatusChanged!();
+                    }
                     Navigator.pop(context); // Return to wordbook list page
                   }
                 },

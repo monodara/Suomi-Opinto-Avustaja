@@ -4,6 +4,9 @@ import 'package:hive/hive.dart';
 import '../utils/aurora_gradient.dart';
 import '../widgets/clickable_words_text.dart';
 import '../widgets/papunet_image_dialog.dart'; // New import
+import 'package:frontend/repositories/word_repository.dart'; // New import
+import 'package:frontend/models/saved_word.dart'; // New import
+import 'package:collection/collection.dart'; // New import for firstWhereOrNull
 
 class FlashcardDetailPage extends StatefulWidget {
   final Flashcard flashcard;
@@ -204,38 +207,66 @@ class _FlashcardDetailPageState extends State<FlashcardDetailPage>
         'flashcards',
       );
       final currentCard = _flashcards![_currentIndex];
-      final boxList = flashcardBox.values.toList();
-      int actualIndex = -1;
-      for (int i = 0; i < boxList.length; i++) {
-        if (boxList[i].word == currentCard.word &&
-            boxList[i].pos == currentCard.pos) {
-          actualIndex = i;
-          break;
-        }
-      }
-      if (actualIndex == -1 || actualIndex >= boxList.length) {
+
+      // Find the corresponding SavedWord
+      final wordbookBox = await WordRepository.instance.wordbookBox;
+      final SavedWord? correspondingSavedWord = wordbookBox.values.firstWhereOrNull(
+        (sw) => sw.word == currentCard.word && sw.pos == currentCard.pos,
+      );
+
+      if (correspondingSavedWord == null) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text(
-                'Korttia ei löytynyt tai virheellinen indeksi',
-              ),
+              content: Text('Vastaavaa sanaa ei löytynyt sanakirjasta.'),
             ),
           );
         }
         return;
       }
+
+      // Determine quality based on current isLearned status and toggle intent
+      final int quality = currentCard.isLearned ? 0 : 5; // If currently learned, marking "Ei opittu" means quality 0. If not learned, marking "Opittu" means quality 5.
+
+      // Update SRS for the SavedWord
+      await WordRepository.instance.updateWordSRS(correspondingSavedWord, quality);
+
+      // Update the Flashcard's isLearned status to reflect the SavedWord's new status
       final updatedFlashcard = Flashcard(
         word: currentCard.word,
         pos: currentCard.pos,
         definition: currentCard.definition,
         example: currentCard.example,
         createdDate: currentCard.createdDate,
-        nextReviewDate: currentCard.nextReviewDate, // Keep existing nextReviewDate
-        isLearned: !currentCard.isLearned, // Toggle isLearned
+        nextReviewDate: correspondingSavedWord.nextReviewDate, // Get updated nextReviewDate from SavedWord
+        isLearned: correspondingSavedWord.isLearned, // Get updated isLearned from SavedWord
         imageUrl: currentCard.imageUrl,
       );
-      await flashcardBox.putAt(actualIndex, updatedFlashcard);
+      
+      // Find the actual index of the flashcard in the box to update it
+      int actualFlashcardIndex = -1;
+      final boxList = flashcardBox.values.toList();
+      for (int i = 0; i < boxList.length; i++) {
+        if (boxList[i].word == currentCard.word &&
+            boxList[i].pos == currentCard.pos) {
+          actualFlashcardIndex = i;
+          break;
+        }
+      }
+
+      if (actualFlashcardIndex != -1) {
+        await flashcardBox.putAt(actualFlashcardIndex, updatedFlashcard);
+      } else {
+         if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Virhe: Sanakorttia ei löytynyt päivitettäväksi.'),
+            ),
+          );
+        }
+        return;
+      }
+
       setState(() {
         _flashcards![_currentIndex] = updatedFlashcard;
       });

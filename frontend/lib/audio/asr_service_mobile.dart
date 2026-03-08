@@ -2,12 +2,14 @@ import 'package:frontend/audio/asr_service_interface.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:async'; // Import for Completer
 
 class ASRServiceMobile implements ASRServiceInterface {
   final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   String? _lastError;
   String? _lastRecognizedWords;
+  Completer<String?>? _completer; // Completer to hold the result of startListening
 
   @override
   Future<void> init() async {
@@ -15,9 +17,16 @@ class ASRServiceMobile implements ASRServiceInterface {
       onError: (errorNotification) {
         _lastError = errorNotification.errorMsg;
         print('ASR Error: $_lastError');
+        if (_completer != null && !_completer!.isCompleted) {
+          _completer!.completeError(errorNotification.errorMsg);
+        }
       },
       onStatus: (status) {
         print('ASR Status: $status');
+        if (status == 'done' && _completer != null && !_completer!.isCompleted) {
+          print('ASR: Completing with recognized words: $_lastRecognizedWords');
+          _completer!.complete(_lastRecognizedWords);
+        }
       },
     );
     if (!_speechEnabled) {
@@ -27,49 +36,36 @@ class ASRServiceMobile implements ASRServiceInterface {
   }
 
   @override
-  Future<bool> hasPermission() async {
-    var status = await Permission.microphone.status;
-    // If already granted, return true
-    if (status.isGranted) return true;
-
-    // If the user has permanently denied the permission, we should guide them to the app settings
-    if (status.isPermanentlyDenied) {
-      print('Opening app settings for microphone permission.');
-      await openAppSettings();
-      // After opening settings, wait a bit for the user to potentially change settings
-      // and then re-check the status. This is a heuristic.
-      await Future.delayed(const Duration(seconds: 2));
-      status = await Permission.microphone.status;
-      if (status.isGranted) return true; // Permission granted after user interaction
-      return false; // Still not granted
-    }
-
-    // Try requesting permission again
-    status = await Permission.microphone.request();
-    return status.isGranted;
-  }
-
-  @override
   Future<String?> startListening(String languageCode) async {
-    if (_speechEnabled) {
-      _lastRecognizedWords = null;
-      _lastError = null;
-      await _speechToText.listen(
-        onResult: (result) {
-          _lastRecognizedWords = result.recognizedWords;
-        },
-        localeId: languageCode,
-      );
-      return null; // Result will come via onResult callback
-    } else {
+    if (!_speechEnabled) {
       _lastError = 'Speech recognition not initialized or available.';
+      print('ASR: startListening failed - $_lastError');
       return null;
     }
+
+    _lastRecognizedWords = null;
+    _lastError = null;
+    _completer = Completer<String?>(); // Create a new completer
+    print('ASR: Starting listening...');
+
+    await _speechToText.listen(
+      onResult: (result) {
+        _lastRecognizedWords = result.recognizedWords;
+        print('ASR: Recognized words (partial/final): $_lastRecognizedWords');
+      },
+      localeId: languageCode,
+    );
+    return _completer!.future; // Return the future from the completer
   }
 
   @override
   Future<void> stopListening() async {
+    print('ASR: Stopping listening...');
     await _speechToText.stop();
+    if (_completer != null && !_completer!.isCompleted) {
+      print('ASR: Completing with recognized words from stop: $_lastRecognizedWords');
+      _completer!.complete(_lastRecognizedWords); // Complete with the last recognized words
+    }
   }
 
   @override

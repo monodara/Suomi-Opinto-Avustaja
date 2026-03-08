@@ -9,7 +9,7 @@ class NavigationController {
   NavigationController._internal();
   
   VoidCallback? onReturnToHome;
-  Function(NewsItem)? onShowArticleDetails;
+  Function(NewsItem, {VoidCallback? onSentencePracticed})? onShowArticleDetails;
   
   void returnToHome() {
     if (onReturnToHome != null) {
@@ -17,9 +17,9 @@ class NavigationController {
     }
   }
   
-  void showArticleDetails(NewsItem article) {
+  void showArticleDetails(NewsItem article, {VoidCallback? onSentencePracticed}) {
     if (onShowArticleDetails != null) {
-      onShowArticleDetails!(article);
+      onShowArticleDetails!(article, onSentencePracticed: onSentencePracticed);
     }
   }
 }

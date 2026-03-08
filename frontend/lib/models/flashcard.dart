@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'flashcard.g.dart';
 
-@HiveType(typeId: 3)
+@HiveType(typeId: 5) // Increment typeId
 class Flashcard extends HiveObject {
   @HiveField(0)
   String word;
@@ -37,6 +37,11 @@ class Flashcard extends HiveObject {
   @HiveField(10)
   String? imageUrl;
 
+  @HiveField(11)
+  DateTime? _lastLearnedDate; // New field
+  DateTime? get lastLearnedDate => _lastLearnedDate;
+  set lastLearnedDate(DateTime? value) => _lastLearnedDate = value;
+
   Flashcard({
     required this.word,
     required this.definition,
@@ -49,5 +54,6 @@ class Flashcard extends HiveObject {
     required this.pos,
     required this.createdDate,
     this.imageUrl,
-  });
+    DateTime? lastLearnedDate, // New constructor parameter
+  }) : _lastLearnedDate = lastLearnedDate;
 }

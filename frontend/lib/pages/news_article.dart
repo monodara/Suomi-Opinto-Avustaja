@@ -2,13 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:frontend/models/news_item.dart';
 import 'package:frontend/utils/navigation_controller.dart';
 import 'package:frontend/repositories/article_repository.dart';
+import 'package:frontend/repositories/user_activity_repository.dart'; // New import
 import '../widgets/article_content_display.dart'; // New import
 import 'package:frontend/pages/shadowing_practice_page.dart'; // New import
 
-class NewsDetailPage extends StatelessWidget {
+class NewsDetailPage extends StatefulWidget {
   final NewsItem article;
+  final VoidCallback? onSentencePracticed; // New parameter
 
-  const NewsDetailPage({super.key, required this.article});
+  const NewsDetailPage({
+    super.key,
+    required this.article,
+    this.onSentencePracticed, // Initialize new parameter
+  });
+
+  @override
+  State<NewsDetailPage> createState() => _NewsDetailPageState();
+}
+
+class _NewsDetailPageState extends State<NewsDetailPage> {
+  @override
+  void initState() {
+    super.initState();
+    UserActivityRepository.instance.recordArticleView(widget.article);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +50,7 @@ class NewsDetailPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ShadowingPracticePage(
-                    articleContent: article.content,
+                    articleContent: widget.article.content,
                   ),
                 ),
               );
@@ -44,7 +61,7 @@ class NewsDetailPage extends StatelessWidget {
             onPressed: () async {
               try {
                 final isAlreadySaved = await ArticleRepository.instance
-                    .isArticleSaved(article);
+                    .isArticleSaved(widget.article);
 
                 if (isAlreadySaved) {
                   if (context.mounted) {
@@ -57,7 +74,7 @@ class NewsDetailPage extends StatelessWidget {
                   return;
                 }
 
-                await ArticleRepository.instance.saveArticle(article);
+                await ArticleRepository.instance.saveArticle(widget.article);
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -92,9 +109,9 @@ class NewsDetailPage extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: ArticleContentDisplay(
-            date: article.date,
-            image: article.image,
-            structuredContent: article.content,
+            date: widget.article.date,
+            image: widget.article.image,
+            structuredContent: widget.article.content,
           ),
         ),
       ),
